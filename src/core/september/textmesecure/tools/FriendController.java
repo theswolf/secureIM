@@ -1,6 +1,6 @@
-package com.mekya.tools;
+package core.september.textmesecure.tools;
 
-import com.mekya.types.FriendInfo;
+import core.september.textmesecure.types.FriendInfo;
 
 /*
  * This class can store friendInfo and check userkey and username combination 

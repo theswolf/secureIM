@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mekya.services;
+package core.september.textmesecure.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,16 +40,16 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.mekya.Login;
-import com.mekya.Messaging;
-import com.mekya.R;
-import com.mekya.communication.SocketOperator;
-import com.mekya.interfaces.IAppManager;
-import com.mekya.interfaces.ISocketOperator;
-import com.mekya.interfaces.IUpdateData;
-import com.mekya.tools.FriendController;
-import com.mekya.tools.XMLHandler;
-import com.mekya.types.FriendInfo;
+import core.september.textmesecure.Login;
+import core.september.textmesecure.Messaging;
+import core.september.textmesecure.R;
+import core.september.textmesecure.communication.SocketOperator;
+import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.interfaces.ISocketOperator;
+import core.september.textmesecure.interfaces.IUpdateData;
+import core.september.textmesecure.tools.FriendController;
+import core.september.textmesecure.tools.XMLHandler;
+import core.september.textmesecure.types.FriendInfo;
 
 /**
  * This is an example of implementing an application service that runs locally

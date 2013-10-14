@@ -1,4 +1,4 @@
-package com.mekya;
+package core.september.textmesecure;
 
 import android.app.ListActivity;
 import android.app.NotificationManager;
@@ -14,9 +14,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.mekya.interfaces.IAppManager;
-import com.mekya.services.IMService;
-import com.mekya.types.FriendInfo;
+import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.services.IMService;
+import core.september.textmesecure.types.FriendInfo;
 
 public class UnApprovedFriendList extends ListActivity {
 	

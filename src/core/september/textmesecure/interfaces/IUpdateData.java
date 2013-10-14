@@ -1,5 +1,5 @@
-package com.mekya.interfaces;
-import com.mekya.types.FriendInfo;
+package core.september.textmesecure.interfaces;
+import core.september.textmesecure.types.FriendInfo;
 
 
 public interface IUpdateData {

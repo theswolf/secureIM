@@ -1,4 +1,4 @@
-package com.mekya.tools;
+package core.september.textmesecure.tools;
 
 import java.util.Vector;
 
@@ -6,9 +6,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.mekya.interfaces.IUpdateData;
-import com.mekya.types.FriendInfo;
-import com.mekya.types.STATUS;
+import core.september.textmesecure.interfaces.IUpdateData;
+import core.september.textmesecure.types.FriendInfo;
+import core.september.textmesecure.types.STATUS;
 
 /*
  * Parses the xml data to FriendInfo array

@@ -1,4 +1,4 @@
-package com.mekya.communication;
+package core.september.textmesecure.communication;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,8 +16,8 @@ import java.util.Iterator;
 
 import android.util.Log;
 
-import com.mekya.interfaces.IAppManager;
-import com.mekya.interfaces.ISocketOperator;
+import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.interfaces.ISocketOperator;
 
 public class SocketOperator implements ISocketOperator
 {

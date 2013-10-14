@@ -1,4 +1,4 @@
-package com.mekya.interfaces;
+package core.september.textmesecure.interfaces;
 
 
 public interface IAppManager {

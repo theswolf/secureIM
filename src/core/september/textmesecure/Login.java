@@ -1,4 +1,4 @@
-package com.mekya;
+package core.september.textmesecure;
 
 
 import android.app.Activity;
@@ -20,8 +20,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.mekya.interfaces.IAppManager;
-import com.mekya.services.IMService;
+import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.services.IMService;
 
 public class Login extends Activity {	
 

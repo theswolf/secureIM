@@ -1,4 +1,4 @@
-package com.mekya;
+package core.september.textmesecure;
 
 
 import android.app.Activity;
@@ -23,10 +23,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.mekya.interfaces.IAppManager;
-import com.mekya.services.IMService;
-import com.mekya.tools.FriendController;
-import com.mekya.types.FriendInfo;
+import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.services.IMService;
+import core.september.textmesecure.tools.FriendController;
+import core.september.textmesecure.types.FriendInfo;
 
 public class Messaging extends Activity {
 

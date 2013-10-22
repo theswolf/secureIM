@@ -1,18 +1,28 @@
 package core.september.textmesecure.sql.models;
 
+import com.niusounds.sqlite.Persistence;
+import com.niusounds.sqlite.PrimaryKey;
+
 
 public class Conversation {
-	private long id;
+	
+	@Persistence
+    @PrimaryKey(autoIncrement = true)
+	private long _id;
+	
+	@Persistence
 	private String pubKey;
+	
+	@Persistence
 	private long createdAtUnixTime;
 	
 	public Conversation(Long id, String pubkey, Long createdAt) {
-		this.id = id;
+		this._id = id;
 		this.pubKey = pubkey;
 		this.createdAtUnixTime = createdAt;
 	}
 	public long getId() {
-		return id;
+		return _id;
 	}
 	public String getPubKey() {
 		return pubKey;
@@ -21,7 +31,7 @@ public class Conversation {
 		return createdAtUnixTime;
 	}
 	public void setId(long id) {
-		this.id = id;
+		this._id = id;
 	}
 	public void setPubKey(String pubKey) {
 		this.pubKey = pubKey;

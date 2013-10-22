@@ -12,6 +12,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.spongycastle.crypto.digests.MD5Digest;
+import org.spongycastle.jcajce.provider.asymmetric.rsa.DigestSignatureSpi.MD5;
 import org.xml.sax.SAXException;
 
 import android.app.Notification;
@@ -27,13 +29,17 @@ import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.niusounds.sqlite.SQLiteDAO;
+
 import core.september.textmesecure.Login;
 import core.september.textmesecure.Messaging;
 import core.september.textmesecure.R;
-import core.september.textmesecure.communication.SocketOperator;
+import core.september.textmesecure.communication.O9SocketOperator;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.interfaces.ISocketOperator;
 import core.september.textmesecure.interfaces.IUpdateData;
+import core.september.textmesecure.sql.models.User;
 import core.september.textmesecure.tools.FriendController;
 import core.september.textmesecure.tools.XMLHandler;
 import core.september.textmesecure.types.FriendInfo;
@@ -50,7 +56,7 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 	private String rawFriendList = new String();
 
 
-	ISocketOperator socketOperator = new SocketOperator(this);
+	ISocketOperator socketOperator = new O9SocketOperator(this);
 
 	private final IBinder mBinder = new IMBinder();
 	private String username;
@@ -84,27 +90,10 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 				try {
 					runner.join(1000);
 					socketOperator.stopListening();
-					runner = new Thread()
-					{
-						@Override
-						public void run() {			
-
-							//socketOperator.startListening(LISTENING_PORT_NO);
-							Random random = new Random();
-							int tryCount = 0;
-							while (socketOperator.startListening(10000 + random.nextInt(20000))  == 0 )
-							{		
-								tryCount++; 
-								if (tryCount > 10)
-								{
-									// if it can't listen a port after trying 10 times, give up...
-									break;
-								}
-
-							}
-						}
-					};		
-					runner.start();
+					runThread();
+					SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
+					User me = dao.get(User.class).get(0);
+					signUpUser(me.getUsername(), me.getPassword(), me.getEmail());
 				}
 				catch(Throwable t) {
 					android.util.Log.d(TAG, "Errors on changing connection events", t);
@@ -127,27 +116,10 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 		// Timer is used to take the friendList info every UPDATE_TIME_PERIOD;
 		timer = new Timer();   
 
-		runner = new Thread()
-		{
-			@Override
-			public void run() {			
-
-				//socketOperator.startListening(LISTENING_PORT_NO);
-				Random random = new Random();
-				int tryCount = 0;
-				while (socketOperator.startListening(10000 + random.nextInt(20000))  == 0 )
-				{		
-					tryCount++; 
-					if (tryCount > 10)
-					{
-						// if it can't listen a port after trying 10 times, give up...
-						break;
-					}
-
-				}
-			}
-		};		
-		runner.start();
+		//
+		
+		runThread();
+		
 		registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
 	}
@@ -368,16 +340,31 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 		this.stopSelf();
 	}
 
-	public String signUpUser(String usernameText, String passwordText,
-			String emailText) 
+	public String signUpUser(String usernameText, String passwordText,String emailText) 
 	{
+		SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
+		dao.delete(User.class, "_id=?", "0");
+		
+		
+		
+		User user = new User(0, usernameText, passwordText, emailText, false);
+		dao.insert(user);
+		
+		MD5Digest digest = new MD5Digest();
+		digest.reset();
+		digest.update(passwordText.getBytes(), 0, passwordText.getBytes().length);
+		int length = digest.getDigestSize();
+        byte[] md5 = new byte[length];
+        digest.doFinal(md5, 0);
+
+		
 		String params = "username=" + usernameText +
-				"&password=" + passwordText +
+				"&password=" + (new String(md5)) +
 				"&action=" + "signUpUser"+
 				"&email=" + emailText+
 				"&";
 
-		String result = socketOperator.sendHttpRequest(params);		
+		String result = socketOperator.sendHttpRequest(params);	
 
 		return result;
 	}
@@ -437,5 +424,29 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 		FriendController.setFriendsInfo(friends);
 		FriendController.setUnapprovedFriendsInfo(unApprovedFriends);
 
+	}
+	
+	private void runThread() {
+		runner = new Thread()
+		{
+			@Override
+			public void run() {			
+
+				//socketOperator.startListening(LISTENING_PORT_NO);
+				Random random = new Random();
+				int tryCount = 0;
+				while (socketOperator.startListening(10000 + random.nextInt(20000))  == 0 )
+				{		
+					tryCount++; 
+					if (tryCount > 10)
+					{
+						// if it can't listen a port after trying 10 times, give up...
+						break;
+					}
+
+				}
+			}
+		};		
+		runner.start();
 	}
 }

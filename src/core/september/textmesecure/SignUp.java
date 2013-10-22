@@ -16,9 +16,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.IMService;
+import core.september.textmesecure.services.O9IMService;
 
 public class SignUp extends Activity {
 	
@@ -52,7 +52,7 @@ public class SignUp extends Activity {
             // interact with the service.  Because we have bound to a explicit
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
-            imService = ((IMService.IMBinder)service).getService();  
+            imService = ((O9IMService.IMBinder)service).getService();  
             
             
         }

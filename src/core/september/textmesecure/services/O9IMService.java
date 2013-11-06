@@ -13,7 +13,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.spongycastle.crypto.digests.MD5Digest;
-import org.spongycastle.jcajce.provider.asymmetric.rsa.DigestSignatureSpi.MD5;
 import org.xml.sax.SAXException;
 
 import android.app.Notification;
@@ -30,7 +29,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.niusounds.sqlite.SQLiteDAO;
+import com.niusounds.asd.SQLiteDAO;
 
 import core.september.textmesecure.Login;
 import core.september.textmesecure.Messaging;
@@ -56,7 +55,7 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 	private String rawFriendList = new String();
 
 
-	ISocketOperator socketOperator = new O9SocketOperator(this);
+	//ISocketOperator socketOperator = new O9SocketOperator(this);
 
 	private final IBinder mBinder = new IMBinder();
 	private String username;
@@ -77,31 +76,31 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 
 	}
 
-	private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-			String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
-			boolean isFailover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
-			NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-			NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
-
-			if(runner != null) {
-				try {
-					runner.join(1000);
-					socketOperator.stopListening();
-					runThread();
-					SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
-					User me = dao.get(User.class).get(0);
-					signUpUser(me.getUsername(), me.getPassword(), me.getEmail());
-				}
-				catch(Throwable t) {
-					android.util.Log.d(TAG, "Errors on changing connection events", t);
-				}
-				
-			}
-		}
-	}; 
+//	private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context context, Intent intent) {
+//			boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+//			String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
+//			boolean isFailover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
+//			NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+//			NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
+//
+//			if(runner != null) {
+//				try {
+//					runner.join(1000);
+//					socketOperator.stopListening();
+//					runThread();
+//					SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
+//					User me = dao.get(User.class).get(0);
+//					signUpUser(me.getUsername(), me.getPassword(), me.getEmail());
+//				}
+//				catch(Throwable t) {
+//					android.util.Log.d(TAG, "Errors on changing connection events", t);
+//				}
+//				
+//			}
+//		}
+//	}; 
 
 	@Override
 	public void onCreate() 
@@ -120,7 +119,7 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 		
 		runThread();
 		
-		registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+		//registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
 	}
 

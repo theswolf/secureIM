@@ -1,38 +1,49 @@
 package core.september.textmesecure.sql.models;
 
-import com.niusounds.sqlite.Persistence;
-import com.niusounds.sqlite.PrimaryKey;
+import com.niusounds.asd.Persistent;
+import com.niusounds.asd.PrimaryKey;
+
+import core.september.textmesecure.types.SubscriptionType;
+
 
 public class User {
-	@Persistence
+	@Persistent
     @PrimaryKey(autoIncrement = false)
 	private long _id;
-	@Persistence
+	@Persistent
 	private String username;
-	@Persistence
+	@Persistent
 	private String password;
-	@Persistence
+	@Persistent
 	private String email;
-	@Persistence
-	private boolean behindProxy;
+	@Persistent
+	private SubscriptionType subscriptionType;
 	
 	
 	
-	public User(long _id, String username, String password, String email,boolean behindProxy) {
+	public User(long _id, String username, String password, String email,SubscriptionType subscriptionType) {
 		super();
 		this._id = _id;
 		this.username = username;
 		this.password = password;
 		this.email = email;
-		this.behindProxy = behindProxy;
+		this.subscriptionType = subscriptionType;
 	}
-	public long getId() {
+
+	
+	
+	public long get_id() {
 		return _id;
 	}
-	public void setId(long id) {
-		this._id = id;
+
+
+
+	public void set_id(long _id) {
+		this._id = _id;
 	}
-	
+
+
+
 	public String getUsername() {
 		return username;
 	}
@@ -51,12 +62,13 @@ public class User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public boolean isBehindProxy() {
-		return behindProxy;
+	public SubscriptionType getSubscriptionType() {
+		return subscriptionType;
 	}
-	public void setBehindProxy(boolean behindProxy) {
-		this.behindProxy = behindProxy;
+	public void setSubscriptionType(SubscriptionType subscriptionType) {
+		this.subscriptionType = subscriptionType;
 	}
+	
 	
 	
 }

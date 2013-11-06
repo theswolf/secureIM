@@ -1,19 +1,19 @@
 package core.september.textmesecure.sql.models;
 
-import com.niusounds.sqlite.Persistence;
-import com.niusounds.sqlite.PrimaryKey;
+import com.niusounds.asd.Persistent;
+import com.niusounds.asd.PrimaryKey;
 
 
 public class Conversation {
 	
-	@Persistence
+	@Persistent
     @PrimaryKey(autoIncrement = true)
 	private long _id;
 	
-	@Persistence
+	@Persistent
 	private String pubKey;
 	
-	@Persistence
+	@Persistent
 	private long createdAtUnixTime;
 	
 	public Conversation(Long id, String pubkey, Long createdAt) {

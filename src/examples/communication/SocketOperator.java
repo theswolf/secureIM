@@ -1,4 +1,4 @@
-package core.september.textmesecure.communication;
+package examples.communication;
 
 import java.io.BufferedReader;
 import java.io.IOException;

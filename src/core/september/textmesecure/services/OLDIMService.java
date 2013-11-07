@@ -62,7 +62,7 @@ import core.september.textmesecure.types.FriendInfo;
  * interact with the user, rather than doing something more disruptive such as
  * calling startActivity().
  */
-public class IMService extends Service implements IAppManager, IUpdateData {
+public class OLDIMService extends Service implements IAppManager, IUpdateData {
 //	private NotificationManager mNM;
 	
 	public static final String TAKE_MESSAGE = "Take_Message";

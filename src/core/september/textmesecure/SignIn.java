@@ -19,7 +19,7 @@ import android.widget.Toast;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
 
-public class SignUp extends Activity {
+public class SignIn extends Activity {
 	
 	private static final int FILL_ALL_FIELDS = 0;
 	protected static final int TYPE_SAME_PASSWORD_IN_PASSWORD_FIELDS = 1;
@@ -33,7 +33,7 @@ public class SignUp extends Activity {
 	private static final String SERVER_RES_RES_SIGN_UP_SUCCESFULL = "1";
 	private static final String SERVER_RES_SIGN_UP_USERNAME_CRASHED = "2";
 	
-	private final static String TAG = SignUp.class.getSimpleName();
+	private final static String TAG = SignIn.class.getSimpleName();
 	
 	private EditText usernameText;
 	private EditText passwordText;
@@ -158,7 +158,7 @@ public class SignUp extends Activity {
 		switch (id) 
 		{
 			case TYPE_SAME_PASSWORD_IN_PASSWORD_FIELDS:			
-				return new AlertDialog.Builder(SignUp.this)       
+				return new AlertDialog.Builder(SignIn.this)       
 				.setMessage(R.string.signup_type_same_password_in_password_fields)
 				.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -167,7 +167,7 @@ public class SignUp extends Activity {
 				})        
 				.create();			
 			case FILL_ALL_FIELDS:				
-				return new AlertDialog.Builder(SignUp.this)       
+				return new AlertDialog.Builder(SignIn.this)       
 				.setMessage(R.string.signup_fill_all_fields)
 				.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -176,7 +176,7 @@ public class SignUp extends Activity {
 				})        
 				.create();
 			case SIGN_UP_FAILED:
-				return new AlertDialog.Builder(SignUp.this)       
+				return new AlertDialog.Builder(SignIn.this)       
 				.setMessage(R.string.signup_failed)
 				.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -185,7 +185,7 @@ public class SignUp extends Activity {
 				})        
 				.create();
 			case SIGN_UP_USERNAME_CRASHED:
-				return new AlertDialog.Builder(SignUp.this)       
+				return new AlertDialog.Builder(SignIn.this)       
 				.setMessage(R.string.signup_username_crashed)
 				.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -194,7 +194,7 @@ public class SignUp extends Activity {
 				})        
 				.create();
 			case SIGN_UP_SUCCESSFULL:
-				return new AlertDialog.Builder(SignUp.this)       
+				return new AlertDialog.Builder(SignIn.this)       
 				.setMessage(R.string.signup_successfull)
 				.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -203,7 +203,7 @@ public class SignUp extends Activity {
 				})        
 				.create();	
 			case USERNAME_AND_PASSWORD_LENGTH_SHORT:
-				return new AlertDialog.Builder(SignUp.this)       
+				return new AlertDialog.Builder(SignIn.this)       
 				.setMessage(R.string.username_and_password_length_short)
 				.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -221,7 +221,7 @@ public class SignUp extends Activity {
 	
 	@Override
 	protected void onResume() {
-		bindService(new Intent(SignUp.this, IMService.class), mConnection , Context.BIND_AUTO_CREATE);
+		bindService(new Intent(SignIn.this, IMService.class), mConnection , Context.BIND_AUTO_CREATE);
 		   
 		super.onResume();
 	}

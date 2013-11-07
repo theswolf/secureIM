@@ -1,4 +1,4 @@
-package core.september.textmesecure;
+package examples;
 
 import android.app.ListActivity;
 import android.app.Notification;

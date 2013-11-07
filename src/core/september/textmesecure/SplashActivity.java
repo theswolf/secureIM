@@ -4,8 +4,12 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -15,6 +19,8 @@ import com.quickblox.core.QBSettings;
 import com.quickblox.core.result.Result;
 import com.quickblox.module.auth.QBAuth;
 
+import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.services.O9IMService;
 import core.september.textmesecure.sql.models.User;
 import core.september.textmesecure.util.SystemUiHider;
 
@@ -25,151 +31,10 @@ import core.september.textmesecure.util.SystemUiHider;
  * @see SystemUiHider
  */
 public class SplashActivity extends Activity  implements QBCallback {
-//	/**
-//	 * Whether or not the system UI should be auto-hidden after
-//	 * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-//	 */
-//	private static final boolean AUTO_HIDE = true;
-//
-//	/**
-//	 * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-//	 * user interaction before hiding the system UI.
-//	 */
-//	private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-//
-//	/**
-//	 * If set, will toggle the system UI visibility upon interaction. Otherwise,
-//	 * will show the system UI visibility upon interaction.
-//	 */
-//	private static final boolean TOGGLE_ON_CLICK = true;
-//
-//	/**
-//	 * The flags to pass to {@link SystemUiHider#getInstance}.
-//	 */
-//	private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
-//
-//	/**
-//	 * The instance of the {@link SystemUiHider} for this activity.
-//	 */
-//	private SystemUiHider mSystemUiHider;
-//
-//	@Override
-//	protected void onCreate(Bundle savedInstanceState) {
-//		super.onCreate(savedInstanceState);
-//
-//		setContentView(R.layout.activity_splash);
-//
-////		final View controlsView = findViewById(R.id.fullscreen_content_controls);
-////		final View contentView = findViewById(R.id.fullscreen_content);
-//
-//		// Set up an instance of SystemUiHider to control the system UI for
-//		// this activity.
-//		mSystemUiHider = SystemUiHider.getInstance(this, contentView,
-//				HIDER_FLAGS);
-//		mSystemUiHider.setup();
-//		mSystemUiHider
-//				.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-//					// Cached values.
-//					int mControlsHeight;
-//					int mShortAnimTime;
-//
-//					@Override
-//					@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-//					public void onVisibilityChange(boolean visible) {
-//						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-//							// If the ViewPropertyAnimator API is available
-//							// (Honeycomb MR2 and later), use it to animate the
-//							// in-layout UI controls at the bottom of the
-//							// screen.
-//							if (mControlsHeight == 0) {
-//								mControlsHeight = controlsView.getHeight();
-//							}
-//							if (mShortAnimTime == 0) {
-//								mShortAnimTime = getResources().getInteger(
-//										android.R.integer.config_shortAnimTime);
-//							}
-//							controlsView
-//									.animate()
-//									.translationY(visible ? 0 : mControlsHeight)
-//									.setDuration(mShortAnimTime);
-//						} else {
-//							// If the ViewPropertyAnimator APIs aren't
-//							// available, simply show or hide the in-layout UI
-//							// controls.
-//							controlsView.setVisibility(visible ? View.VISIBLE
-//									: View.GONE);
-//						}
-//
-//						if (visible && AUTO_HIDE) {
-//							// Schedule a hide().
-//							delayedHide(AUTO_HIDE_DELAY_MILLIS);
-//						}
-//					}
-//				});
-//
-//		// Set up the user interaction to manually show or hide the system UI.
-//		contentView.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View view) {
-//				if (TOGGLE_ON_CLICK) {
-//					mSystemUiHider.toggle();
-//				} else {
-//					mSystemUiHider.show();
-//				}
-//			}
-//		});
-//
-//		// Upon interacting with UI controls, delay any scheduled hide()
-//		// operations to prevent the jarring behavior of controls going away
-//		// while interacting with the UI.
-//		findViewById(R.id.dummy_button).setOnTouchListener(
-//				mDelayHideTouchListener);
-//	}
-//
-//	@Override
-//	protected void onPostCreate(Bundle savedInstanceState) {
-//		super.onPostCreate(savedInstanceState);
-//
-//		// Trigger the initial hide() shortly after the activity has been
-//		// created, to briefly hint to the user that UI controls
-//		// are available.
-//		delayedHide(100);
-//	}
-//
-//	/**
-//	 * Touch listener to use for in-layout UI controls to delay hiding the
-//	 * system UI. This is to prevent the jarring behavior of controls going away
-//	 * while interacting with activity UI.
-//	 */
-//	View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-//		@Override
-//		public boolean onTouch(View view, MotionEvent motionEvent) {
-//			if (AUTO_HIDE) {
-//				delayedHide(AUTO_HIDE_DELAY_MILLIS);
-//			}
-//			return false;
-//		}
-//	};
-//
-//	Handler mHideHandler = new Handler();
-//	Runnable mHideRunnable = new Runnable() {
-//		@Override
-//		public void run() {
-//			mSystemUiHider.hide();
-//		}
-//	};
-//
-//	/**
-//	 * Schedules a call to hide() in [delay] milliseconds, canceling any
-//	 * previously scheduled calls.
-//	 */
-//	private void delayedHide(int delayMillis) {
-//		mHideHandler.removeCallbacks(mHideRunnable);
-//		mHideHandler.postDelayed(mHideRunnable, delayMillis);
-//	}
-	
+
+	private final static String TAG = SplashActivity.class.getSimpleName();
 	private ProgressBar progressBar;
-	
+	private IAppManager imService;
 	private enum Route {
 		NEED_SIGNUP,
 		NEED_SIGNIN,
@@ -178,6 +43,29 @@ public class SplashActivity extends Activity  implements QBCallback {
 	
 	private User user = null;
 	private Route route;
+	
+	  private ServiceConnection mConnection = new ServiceConnection() {
+	        public void onServiceConnected(ComponentName className, IBinder service) {
+	            // This is called when the connection with the service has been
+	            // established, giving us the service object we can use to
+	            // interact with the service.  Because we have bound to a explicit
+	            // service that we know is running in our own process, we can
+	            // cast its IBinder to a concrete class and directly access it.
+	            imService = ((O9IMService.IMBinder)service).getService();  
+	            
+	        
+	        }
+
+	        public void onServiceDisconnected(ComponentName className) {
+	            // This is called when the connection with the service has been
+	            // unexpectedly disconnected -- that is, its process crashed.
+	            // Because it is running in our same process, we should never
+	            // see this happen.
+	        	imService = null;
+	        	android.util.Log.d(TAG, getResources().getString(R.string.local_service_stopped));
+	        }
+	    };
+		
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,6 +89,7 @@ public class SplashActivity extends Activity  implements QBCallback {
         // Initialize QuickBlox application with credentials.
         // Getting app credentials -- http://quickblox.com/developers/Getting_application_credentials
         
+        startService(new Intent(SplashActivity.this,  O9IMService.class));
         
         SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
         List<User> list = dao.get(User.class);
@@ -258,4 +147,19 @@ public class SplashActivity extends Activity  implements QBCallback {
     @Override
     public void onComplete(Result result, Object context) {
     }
+    
+	@Override
+	protected void onPause() 
+	{
+		unbindService(mConnection);
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() 
+	{		
+		bindService(new Intent(SplashActivity.this, O9IMService.class), mConnection , Context.BIND_AUTO_CREATE);
+	    		
+		super.onResume();
+	}
 }

@@ -1,4 +1,4 @@
-package core.september.textmesecure.interfaces;
+package interfaces;
 import core.september.textmesecure.types.FriendInfo;
 
 

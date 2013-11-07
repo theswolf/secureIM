@@ -15,6 +15,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.spongycastle.crypto.digests.MD5Digest;
 import org.xml.sax.SAXException;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -28,8 +29,15 @@ import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.niusounds.asd.SQLiteDAO;
+import com.quickblox.core.QBCallback;
+import com.quickblox.core.result.Result;
+import com.quickblox.module.users.QBUsers;
+import com.quickblox.module.users.model.QBUser;
+import com.quickblox.sample.chat.MainActivity;
+import com.quickblox.sample.chat.UsersListActivity;
 
 import core.september.textmesecure.Login;
 import core.september.textmesecure.Messaging;
@@ -43,7 +51,7 @@ import core.september.textmesecure.tools.FriendController;
 import core.september.textmesecure.tools.XMLHandler;
 import core.september.textmesecure.types.FriendInfo;
 
-public class O9IMService extends Service implements IAppManager, IUpdateData {
+public class O9IMService extends Service implements IAppManager, IUpdateData, QBCallback {
 	//	private NotificationManager mNM;
 
 	public static final String TAG = O9IMService.class.getName();
@@ -64,6 +72,7 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 	private boolean authenticatedUser = false;
 	// timer to take the updated data from server
 	private Timer timer;
+	private QBUser user;
 
 	private NotificationManager mNM;
 	private Thread runner;
@@ -344,27 +353,9 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 		SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
 		dao.delete(User.class, "_id=?", "0");
 		
+		user = new QBUser(usernameText, passwordText, emailText);
+		QBUsers.signUpSignInTask(user, O9IMService.this);
 		
-		
-		User user = new User(0, usernameText, passwordText, emailText, false);
-		dao.insert(user);
-		
-		MD5Digest digest = new MD5Digest();
-		digest.reset();
-		digest.update(passwordText.getBytes(), 0, passwordText.getBytes().length);
-		int length = digest.getDigestSize();
-        byte[] md5 = new byte[length];
-        digest.doFinal(md5, 0);
-
-		
-		String params = "username=" + usernameText +
-				"&password=" + (new String(md5)) +
-				"&action=" + "signUpUser"+
-				"&email=" + emailText+
-				"&";
-
-		String result = socketOperator.sendHttpRequest(params);	
-
 		return result;
 	}
 
@@ -425,27 +416,52 @@ public class O9IMService extends Service implements IAppManager, IUpdateData {
 
 	}
 	
-	private void runThread() {
-		runner = new Thread()
-		{
-			@Override
-			public void run() {			
+//	private void runThread() {
+//		runner = new Thread()
+//		{
+//			@Override
+//			public void run() {			
+//
+//				//socketOperator.startListening(LISTENING_PORT_NO);
+//				Random random = new Random();
+//				int tryCount = 0;
+//				while (socketOperator.startListening(10000 + random.nextInt(20000))  == 0 )
+//				{		
+//					tryCount++; 
+//					if (tryCount > 10)
+//					{
+//						// if it can't listen a port after trying 10 times, give up...
+//						break;
+//					}
+//
+//				}
+//			}
+//		};		
+//		runner.start();
+//	}
 
-				//socketOperator.startListening(LISTENING_PORT_NO);
-				Random random = new Random();
-				int tryCount = 0;
-				while (socketOperator.startListening(10000 + random.nextInt(20000))  == 0 )
-				{		
-					tryCount++; 
-					if (tryCount > 10)
-					{
-						// if it can't listen a port after trying 10 times, give up...
-						break;
-					}
+	@Override
+	public void onComplete(Result result) {
+		 if (result.isSuccess()) {
+	            Intent intent = new Intent(this, UsersListActivity.class);
+	            intent.putExtra("myId", user.getId());
+	            intent.putExtra("myLogin", user.getLogin());
+	            intent.putExtra("myPassword", user.getPassword());
 
-				}
-			}
-		};		
-		runner.start();
+	            startActivity(intent);
+	            Toast.makeText(this, "You've been successfully logged in application",
+	                    Toast.LENGTH_SHORT).show();
+	        } else {
+	            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+	            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+	                    "please. Errors: " + result.getErrors()).create().show();
+	        }
+		
+	}
+
+	@Override
+	public void onComplete(Result arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		
 	}
 }

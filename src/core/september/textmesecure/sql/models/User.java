@@ -3,10 +3,17 @@ package core.september.textmesecure.sql.models;
 import com.niusounds.asd.Persistent;
 import com.niusounds.asd.PrimaryKey;
 
-import core.september.textmesecure.types.SubscriptionType;
 
 
 public class User {
+	
+	public enum SubscriptionType {
+		BASIC,
+		PAID,
+		VIP
+	}
+	
+	
 	@Persistent
     @PrimaryKey(autoIncrement = false)
 	private long _id;

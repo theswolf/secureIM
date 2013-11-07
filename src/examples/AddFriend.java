@@ -1,4 +1,4 @@
-package core.september.textmesecure;
+package examples;
 
 import android.app.Activity;
 import android.app.AlertDialog;

@@ -13,7 +13,7 @@
         android:targetSdkVersion="22" />
 
     <application>
-        <activity android:name="core.september.textmesecure.FriendList" >
+<!--         <activity android:name="core.september.textmesecure.FriendList" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" >
                 </action>
@@ -70,7 +70,7 @@
                 <category android:name="android.intent.category.NORMAL" >
                 </category>
             </intent-filter>
-        </activity>
+        </activity> -->
         <activity
             android:name="core.september.textmesecure.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

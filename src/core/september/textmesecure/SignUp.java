@@ -40,7 +40,6 @@ public class SignUp extends Activity {
 	private EditText eMailText;
 	private EditText passwordAgainText;
 	private IAppManager imService;
-	private Handler handler = new Handler();
 	
 	private ServiceConnection mConnection = new ServiceConnection() {
         
@@ -100,26 +99,9 @@ public class SignUp extends Activity {
 										String result = new String();
 										@Override
 										public void run() {
-											result = imService.signUpUser(usernameText.getText().toString(), 
+											imService.signUpUser(usernameText.getText().toString(), 
 													passwordText.getText().toString(), 
 													eMailText.getText().toString());
-		
-											handler.post(new Runnable(){
-		
-												public void run() {
-													if (result.equals(SERVER_RES_RES_SIGN_UP_SUCCESFULL)) {
-														showDialog(SIGN_UP_SUCCESSFULL);
-													}
-													else if (result.equals(SERVER_RES_SIGN_UP_USERNAME_CRASHED)){
-														showDialog(SIGN_UP_USERNAME_CRASHED);
-													}
-													else  //if (result.equals(SERVER_RES_SIGN_UP_FAILED)) 
-													{
-														showDialog(SIGN_UP_FAILED);
-													}			
-												}
-		
-											});
 										}
 		
 									};
@@ -141,12 +123,7 @@ public class SignUp extends Activity {
 				}       	
 	        });
 	        
-	        cancelButton.setOnClickListener(new OnClickListener(){
-				public void onClick(View arg0) 
-				{						
-					finish();					
-				}	        	
-	        });
+
 	        
 	        
 	    }
@@ -221,7 +198,7 @@ public class SignUp extends Activity {
 	
 	@Override
 	protected void onResume() {
-		bindService(new Intent(SignUp.this, IMService.class), mConnection , Context.BIND_AUTO_CREATE);
+		bindService(new Intent(SignUp.this, O9IMService.class), mConnection , Context.BIND_AUTO_CREATE);
 		   
 		super.onResume();
 	}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package core.september.textmesecure.services;
+package examples.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -28,6 +28,7 @@ public class User {
 	
 	
 	
+	
 	public User(long _id, String username, String password, String email,SubscriptionType subscriptionType) {
 		super();
 		this._id = _id;

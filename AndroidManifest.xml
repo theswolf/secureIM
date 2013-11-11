@@ -71,6 +71,8 @@
                 </category>
             </intent-filter>
         </activity> -->
+         <service android:name="core.september.textmesecure.services.O9IMService" >
+        </service>
         <activity
             android:name="core.september.textmesecure.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -81,6 +83,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name="core.september.textmesecure.SignUp"
+                  android:label="Sign Up">
+        </activity>
+        <activity android:name="core.september.textmesecure.SignIn"
+                  android:label="Sign In">
         </activity>
     </application>
 

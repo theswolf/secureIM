@@ -37,8 +37,6 @@ public class SignIn extends Activity {
 	
 	private EditText usernameText;
 	private EditText passwordText;
-	private EditText eMailText;
-	private EditText passwordAgainText;
 	private IAppManager imService;
 	private Handler handler = new Handler();
 	
@@ -71,67 +69,33 @@ public class SignIn extends Activity {
 
 	    
 	               
-	        setContentView(R.layout.activity_signup);
-	        setTitle("Sign up");
+	        setContentView(R.layout.activity_signin);
+	        setTitle("Sign Ip");
 	        
 	        Button signUpButton = (Button) findViewById(R.id.registerButton);
 	        //Button cancelButton = (Button) findViewById(R.id.cancel_signUp);
 	        usernameText = (EditText) findViewById(R.id.loginEdit);
 	        passwordText = (EditText) findViewById(R.id.passwordEdit);  
-	        passwordAgainText = (EditText) findViewById(R.id.passwordConfirm);  
-	        eMailText = (EditText) findViewById(R.id.emailEdit);
 	        
 	        signUpButton.setOnClickListener(new OnClickListener(){
 				public void onClick(View arg0) 
 				{						
 					if (usernameText.length() > 0 &&		
-						passwordText.length() > 0 && 
-						passwordAgainText.length() > 0 &&
-						eMailText.length() > 0
+						passwordText.length() > 0 
 						)
 					{
 						//TODO check email adress is valid
 						
-						if (passwordText.getText().toString().equals(passwordAgainText.getText().toString())){
-						
-							if (usernameText.length() >= 5 && passwordText.length() >= 5) {
 							
 									Thread thread = new Thread(){
 										String result = new String();
 										@Override
 										public void run() {
-											result = imService.signUpUser(usernameText.getText().toString(), 
-													passwordText.getText().toString(), 
-													eMailText.getText().toString());
-		
-											handler.post(new Runnable(){
-		
-												public void run() {
-													if (result.equals(SERVER_RES_RES_SIGN_UP_SUCCESFULL)) {
-														showDialog(SIGN_UP_SUCCESSFULL);
-													}
-													else if (result.equals(SERVER_RES_SIGN_UP_USERNAME_CRASHED)){
-														showDialog(SIGN_UP_USERNAME_CRASHED);
-													}
-													else  //if (result.equals(SERVER_RES_SIGN_UP_FAILED)) 
-													{
-														showDialog(SIGN_UP_FAILED);
-													}			
-												}
-		
-											});
+											imService.signInUser(usernameText.getText().toString(), passwordText.getText().toString());
 										}
-		
 									};
 									thread.start();
-							}
-							else{
-								showDialog(USERNAME_AND_PASSWORD_LENGTH_SHORT);
-							}							
-						}
-						else {
-							showDialog(TYPE_SAME_PASSWORD_IN_PASSWORD_FIELDS);
-						}
+		
 						
 					}
 					else {
@@ -141,12 +105,7 @@ public class SignIn extends Activity {
 				}       	
 	        });
 	        
-	        cancelButton.setOnClickListener(new OnClickListener(){
-				public void onClick(View arg0) 
-				{						
-					finish();					
-				}	        	
-	        });
+	       
 	        
 	        
 	    }
@@ -221,8 +180,7 @@ public class SignIn extends Activity {
 	
 	@Override
 	protected void onResume() {
-		bindService(new Intent(SignIn.this, IMService.class), mConnection , Context.BIND_AUTO_CREATE);
-		   
+		bindService(new Intent(SignIn.this, SignIn.class), mConnection , Context.BIND_AUTO_CREATE);   
 		super.onResume();
 	}
 	

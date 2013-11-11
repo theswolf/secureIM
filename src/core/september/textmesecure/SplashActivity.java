@@ -120,17 +120,19 @@ public class SplashActivity extends Activity  implements QBCallback {
         progressBar.setVisibility(View.GONE);
 
         if (result.isSuccess()) {
-        	
+        	Intent intent;	
         switch (route) {
 		case READY_TO_START:
-			 Intent intent = new Intent(this, MainActivity.class);
+			 intent = new Intent(this, UsersListActivity.class);
 	            startActivity(intent);
 			break;
 		case NEED_SIGNIN:
-			
+			intent = new Intent(this, SignIn.class);
+	            startActivity(intent);
 			break;
 		case NEED_SIGNUP:
-			
+			 intent = new Intent(this, SignUp.class);
+	            startActivity(intent);
 			break;
 		
 		}

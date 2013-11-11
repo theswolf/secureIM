@@ -22,7 +22,6 @@ import com.quickblox.module.auth.QBAuth;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
 import core.september.textmesecure.sql.models.User;
-import core.september.textmesecure.util.SystemUiHider;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.

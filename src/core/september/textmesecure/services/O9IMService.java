@@ -3,10 +3,10 @@ package core.september.textmesecure.services;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Timer;
+
+import org.jivesoftware.smack.packet.Message;
 
 import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -22,6 +22,8 @@ import com.quickblox.module.users.model.QBUser;
 import com.quickblox.module.users.result.QBUserPagedResult;
 
 import core.september.textmesecure.UsersListActivity;
+import core.september.textmesecure.algo.O9Message;
+import core.september.textmesecure.configs.Config;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.sql.models.FriendId;
 import core.september.textmesecure.sql.models.User;
@@ -34,26 +36,10 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	public static final String TAKE_MESSAGE = "Take_Message";
 	public static final String FRIEND_LIST_UPDATED = "Take Friend List";
 	public ConnectivityManager conManager = null; 
-	private final int UPDATE_TIME_PERIOD = 15000;
-	//	private static final int LISTENING_PORT_NO = 8956;
-	private String rawFriendList = new String();
 	private boolean ret = false;
-
-
-	//ISocketOperator socketOperator = new O9SocketOperator(this);
-
 	private final IBinder mBinder = new IMBinder();
-	private String username;
-	private String password;
-	private String userKey;
-	private boolean authenticatedUser = false;
-	// timer to take the updated data from server
-	private Timer timer;
 	private QBUser user;
-
-	private NotificationManager mNM;
-	private Thread runner;
-
+	private O9ChatController controller;
 
 	public class IMBinder extends Binder {
 		public IAppManager getService() {
@@ -88,18 +74,35 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 //		}
 //	}; 
 
+	
+	 private O9ChatController.OnMessageReceivedListener onMessageReceivedListener = new O9ChatController.OnMessageReceivedListener() {
+	        @Override
+	        public void onMessageReceived(final Message message) {
+	            String messageString = message.getBody();
+	            showMessage(messageString, false);
+	        }
+	    };
+	
 	@Override
 	public void onCreate() 
 	{   	
-		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		//mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 		// Display a notification about us starting.  We put an icon in the status bar.
 		//   showNotification();
 		conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-
+		SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
+        List<User> list = dao.get(User.class);
+        
+        if(list != null && list.size() > 0) {
+        	User user = list.get(0);
+        	if(user.getPassword() != null && user.getPassword().trim().length() > 0) {
+        		setUpController(user.getUsername(), user.getPassword());
+        	}
+        }
 
 		// Timer is used to take the friendList info every UPDATE_TIME_PERIOD;
-		timer = new Timer();   
+		//timer = new Timer();   
 
 		//
 		
@@ -190,9 +193,9 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	public void onComplete(Result result) {
 		 if (result.isSuccess()) {
 	            Intent intent = new Intent(this, UsersListActivity.class);
-	            intent.putExtra("myId", user.getId());
-	            intent.putExtra("myLogin", user.getLogin());
-	            intent.putExtra("myPassword", user.getPassword());
+	            intent.putExtra(Config.MY_ID, user.getId());
+	            intent.putExtra(Config.MY_LOGIN, user.getLogin());
+	            intent.putExtra(Config.MY_PASSWORD, user.getPassword());
 
 	            startActivity(intent);
 	            Toast.makeText(this, "You've been successfully logged in application",
@@ -255,4 +258,49 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		
 		
 	}
+
+	@Override
+	public void setUpController(String user, String password) {
+		if(controller != null) {
+			controller = new O9ChatController(user, password);
+			controller.setOnMessageReceivedListener(onMessageReceivedListener);
+		}
+		
+	}
+
+	@Override
+	public void startChat(String friendLogin) {
+		controller.startChat(friendLogin);
+	}
+
+	@Override
+	public void sendMessage(String messageString) {
+		String friendKey = getFriendKeyFromLocalDB(controller.getActualFriendLogin());
+		if(friendKey != null) {
+			String processedMessageString = O9KeyController.getInstance(this).processTextMessage(messageString,controller.getActualFriendLogin());
+			controller.sendMessage(processedMessageString);
+			O9KeyController.getInstance(this).decreaseTTL(controller.getActualFriendLogin());
+		}
+		
+		else {
+			enqueMessage(messageString, controller.getActualFriendLogin());
+			String newPublicKeyRepo = O9KeyController.getInstance(this).generatePublicKey(controller.getActualFriendLogin());
+			String processedMessageString = O9KeyController.getInstance(this).processExchangeMessage(newPublicKeyRepo);
+			controller.sendMessage(processedMessageString);
+		}
+		
+		
+	}
+	
+	private String getFriendKeyFromLocalDB(String friend) {
+		return O9KeyController.getInstance(this).getByFriendLogin(friend).getFriendKey();
+	}
+	
+	private String enqueMessage(String message, String friendLogin) {
+		throw new UnsupportedOperationException("Method need to be dfined");
+	}
+
+	
+   
+
 }

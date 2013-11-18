@@ -29,11 +29,10 @@ import core.september.textmesecure.sql.models.User;
  * 
  * @see SystemUiHider
  */
-public class SplashActivity extends Activity  implements QBCallback {
+public class SplashActivity extends O9BaseActivity  implements QBCallback {
 
 	private final static String TAG = SplashActivity.class.getSimpleName();
 	private ProgressBar progressBar;
-	private IAppManager imService;
 	private enum Route {
 		NEED_SIGNUP,
 		NEED_SIGNIN,
@@ -43,27 +42,6 @@ public class SplashActivity extends Activity  implements QBCallback {
 	private User user = null;
 	private Route route;
 	
-	  private ServiceConnection mConnection = new ServiceConnection() {
-	        public void onServiceConnected(ComponentName className, IBinder service) {
-	            // This is called when the connection with the service has been
-	            // established, giving us the service object we can use to
-	            // interact with the service.  Because we have bound to a explicit
-	            // service that we know is running in our own process, we can
-	            // cast its IBinder to a concrete class and directly access it.
-	            imService = ((O9IMService.IMBinder)service).getService();  
-	            
-	        
-	        }
-
-	        public void onServiceDisconnected(ComponentName className) {
-	            // This is called when the connection with the service has been
-	            // unexpectedly disconnected -- that is, its process crashed.
-	            // Because it is running in our same process, we should never
-	            // see this happen.
-	        	imService = null;
-	        	android.util.Log.d(TAG, getResources().getString(R.string.local_service_stopped));
-	        }
-	    };
 		
 
     @Override
@@ -149,18 +127,4 @@ public class SplashActivity extends Activity  implements QBCallback {
     public void onComplete(Result result, Object context) {
     }
     
-	@Override
-	protected void onPause() 
-	{
-		unbindService(mConnection);
-		super.onPause();
-	}
-
-	@Override
-	protected void onResume() 
-	{		
-		bindService(new Intent(SplashActivity.this, O9IMService.class), mConnection , Context.BIND_AUTO_CREATE);
-	    		
-		super.onResume();
-	}
 }

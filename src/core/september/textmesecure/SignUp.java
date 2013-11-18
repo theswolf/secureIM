@@ -19,7 +19,7 @@ import android.widget.Toast;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
 
-public class SignUp extends Activity {
+public class SignUp extends O9BaseActivity {
 	
 	private static final int FILL_ALL_FIELDS = 0;
 	protected static final int TYPE_SAME_PASSWORD_IN_PASSWORD_FIELDS = 1;
@@ -39,31 +39,7 @@ public class SignUp extends Activity {
 	private EditText passwordText;
 	private EditText eMailText;
 	private EditText passwordAgainText;
-	private IAppManager imService;
 	
-	private ServiceConnection mConnection = new ServiceConnection() {
-        
-
-		public void onServiceConnected(ComponentName className, IBinder service) {
-            // This is called when the connection with the service has been
-            // established, giving us the service object we can use to
-            // interact with the service.  Because we have bound to a explicit
-            // service that we know is running in our own process, we can
-            // cast its IBinder to a concrete class and directly access it.
-            imService = ((O9IMService.IMBinder)service).getService();  
-            
-            
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            // This is called when the connection with the service has been
-            // unexpectedly disconnected -- that is, its process crashed.
-            // Because it is running in our same process, we should never
-            // see this happen.
-        	imService = null;
-        	android.util.Log.d(TAG, getResources().getString(R.string.local_service_stopped));
-        }
-    };
 
 	public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);    
@@ -195,21 +171,5 @@ public class SignUp extends Activity {
 
 	
 	}
-	
-	@Override
-	protected void onResume() {
-		bindService(new Intent(SignUp.this, O9IMService.class), mConnection , Context.BIND_AUTO_CREATE);
-		   
-		super.onResume();
-	}
-	
-	@Override
-	protected void onPause() 
-	{
-		unbindService(mConnection);
-		super.onPause();
-	}
-	
-	
 
 }

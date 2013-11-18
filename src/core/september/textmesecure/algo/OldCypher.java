@@ -27,7 +27,7 @@ import org.spongycastle.crypto.params.ParametersWithRandom;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 import org.spongycastle.util.encoders.Base64;
 
-public class Cypher {
+public class OldCypher {
 	static {
 		Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
 	}
@@ -133,7 +133,7 @@ public class Cypher {
         secureRandom.nextBytes(key);
         secureRandom.nextBytes(iv);
        
-        Cypher crypt = new Cypher();
+        OldCypher crypt = new OldCypher();
         byte[] cipher = crypt.encrypt(text, key);
         
         

@@ -26,20 +26,7 @@
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select user to chat"
-            android:id="@+id/textView" android:layout_gravity="left|center_vertical" android:textSize="20dp"
-            android:layout_marginBottom="10dp"/>
-    <ListView
-            android:id="@+id/usersList"
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-    </ListView>
-    </FrameLayout>
+        android:layout_height="match_parent" />
     <!-- The navigation drawer -->
      <!-- should not be larger than 320 to show content -->
     <ListView android:id="@+id/left_drawer"

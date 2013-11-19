@@ -69,7 +69,7 @@ public class UsersListActivity extends O9BaseActivity {
 	        setContentView(R.layout.activity_users_list);
 
 	        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-	        usersList = (ListView) findViewById(R.id.usersList);
+	        //usersList = (ListView) findViewById(R.id.usersList);
 
 	        progressDialog = new ProgressDialog(this);
 	        progressDialog.setMessage("Loading fiends list");

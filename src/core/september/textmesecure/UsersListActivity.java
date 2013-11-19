@@ -12,6 +12,7 @@ import org.jivesoftware.smack.packet.Presence.Mode;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -27,6 +28,7 @@ public class UsersListActivity extends O9BaseActivity {
 	private IAppManager imService;
 	 private ListView usersList;
 	 private ProgressDialog progressDialog;
+	 private DrawerLayout mDrawerLayout;
 	
 	    
 	 private static String retrieveState_mode(Mode userMode, boolean isOnline) {
@@ -64,8 +66,9 @@ public class UsersListActivity extends O9BaseActivity {
 	    @Override
 	    protected void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
-	        setContentView(R.layout.users_list);
+	        setContentView(R.layout.activity_users_list);
 
+	        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 	        usersList = (ListView) findViewById(R.id.usersList);
 
 	        progressDialog = new ProgressDialog(this);

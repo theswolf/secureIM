@@ -2,6 +2,9 @@ package core.september.textmesecure.interfaces;
 
 import java.util.List;
 
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
+
 import com.quickblox.module.users.model.QBUser;
 
 
@@ -21,12 +24,13 @@ public interface IAppManager {
 	public void signUpUser(String usernameText, String passwordText, String email);
 	public void signInUser(String usernameText, String passwordText);
 	public List<QBUser> getFriendList();
-	public void setUpController(String user, String password);
+	public void setUpController(String user, String password) throws XMPPException;
 //	public String addNewFriendRequest(String friendUsername);
 //	public String sendFriendsReqsResponse(String approvedFriendNames,
 //			String discardedFriendNames);
 	public void startChat(String friendLogin);
 	public void sendMessage(String messageString);
+	public Presence getPresence(String user);
 
 	
 }

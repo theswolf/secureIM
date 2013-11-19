@@ -5,33 +5,62 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.quickblox.module.chat.QBChat;
-import com.quickblox.module.users.QBUsers;
-import com.quickblox.module.users.model.QBUser;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Presence.Mode;
 
-import core.september.textmesecure.configs.Config;
-import core.september.textmesecure.interfaces.IAppManager;
-import core.september.textmesecure.services.O9IMService;
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import com.quickblox.module.users.model.QBUser;
+
+import core.september.textmesecure.configs.Config;
+import core.september.textmesecure.interfaces.IAppManager;
 
 public class UsersListActivity extends O9BaseActivity {
 	private final static String TAG = UsersListActivity.class.getSimpleName();
 	private IAppManager imService;
 	 private ListView usersList;
 	 private ProgressDialog progressDialog;
-
 	
 	    
+	 private static String retrieveState_mode(Mode userMode, boolean isOnline) {
+	        int userState = 0;
+	        /** 0 for offline, 1 for online, 2 for away,3 for busy*/
+	        if(userMode == Mode.dnd) {
+	            userState = 3;
+	        } else if (userMode == Mode.away || userMode == Mode.xa) {   
+	            userState = 2;
+	        } else if (isOnline) {
+	            userState = 1;
+	        }
+	        //return userState;
+	        String state = "";
+	        switch (userState) {
+			case 0:
+				state = "OFFLINE";
+				break;
+			case 1:
+				state = "ONLINE";
+				break;
+			case 2:
+				state = "AWAY";
+				break;
+			case 3:
+				state = "BUSY";
+				break;
+			default:
+				state = "UNKNOW";
+				break;
+			}
+	        return state;
+	}
+	 
 	    @Override
 	    protected void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
@@ -42,10 +71,24 @@ public class UsersListActivity extends O9BaseActivity {
 	        progressDialog = new ProgressDialog(this);
 	        progressDialog.setMessage("Loading fiends list");
 	        progressDialog.show();
+	        
+	        Bundle extras = getIntent().getExtras();
+
+	        //QBUser me = new QBUser();
+	       int id = extras.getInt(Config.MY_ID);
+	       String login =  extras.getString(Config.MY_LOGIN);
+	       String password = extras.getString(Config.MY_PASSWORD);
 
 	        // ================= QuickBlox ===== Step 4 =================
 	        // Get all users of QB application.
-	        imService.getFriendList();
+	       
+	        try {
+				imService.setUpController(login, password);
+			} catch (XMPPException e) {
+				// TODO Auto-generated catch block
+				android.util.Log.d(TAG,e.getMessage(),e);
+			}
+	        //imService.getFriendList();
 	        
 	        final List<QBUser> users = imService.getFriendList();
             ArrayList<Map<String, String>> usersListForAdapter = new ArrayList<Map<String, String>>();
@@ -53,14 +96,17 @@ public class UsersListActivity extends O9BaseActivity {
             for (QBUser u : users) {
                 Map<String, String> umap = new HashMap<String, String>();
                 umap.put(Config.USER_LOGIN, u.getLogin());
-                umap.put(Config.CHAT_LOGIN, QBChat.getChatLoginFull(u));
+                //umap.put(Config.CHAT_LOGIN, QBChat.getChatLoginFull(u));
+                Presence availability = imService.getPresence(u.getLogin());
+                Mode userMode = availability.getMode();
+                umap.put(Config.USER_STATUS, retrieveState_mode(userMode,availability.isAvailable()));
                 usersListForAdapter.add(umap);
             }
 
             // Put users list into adapter.
             SimpleAdapter usersAdapter = new SimpleAdapter(this, usersListForAdapter,
                     android.R.layout.simple_list_item_2,
-                    new String[]{Config.USER_LOGIN, Config.CHAT_LOGIN},
+                    new String[]{Config.USER_LOGIN, Config.USER_STATUS},
                     new int[]{android.R.id.text1, android.R.id.text2});
 
             usersList.setAdapter(usersAdapter);

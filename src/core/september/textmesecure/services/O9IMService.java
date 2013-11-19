@@ -1,10 +1,14 @@
 package core.september.textmesecure.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Presence;
 
 import android.app.AlertDialog;
 import android.app.Service;
@@ -25,7 +29,7 @@ import core.september.textmesecure.UsersListActivity;
 import core.september.textmesecure.algo.O9Message;
 import core.september.textmesecure.configs.Config;
 import core.september.textmesecure.interfaces.IAppManager;
-import core.september.textmesecure.sql.models.FriendId;
+import core.september.textmesecure.sql.models.EnquedMessage;
 import core.september.textmesecure.sql.models.User;
 import core.september.textmesecure.sql.models.User.SubscriptionType;
 
@@ -46,6 +50,11 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 			return O9IMService.this;
 		}
 
+	}
+	
+	public enum MessageDirection {
+		SENT,
+		RECEIVED
 	}
 
 //	private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
@@ -79,7 +88,32 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	        @Override
 	        public void onMessageReceived(final Message message) {
 	            String messageString = message.getBody();
-	            showMessage(messageString, false);
+	            O9Message o9message = O9Message.fromString(messageString);
+	            O9Message.Type type = o9message.getType();
+	            String friendKey = o9message.getSenderPublicKey();
+	            switch (type) {
+				case KEY_EXCHANGE:
+					String myNewKey = O9KeyController.getInstance(O9IMService.this).generatePublicKey(message.getFrom(), friendKey);
+					String processedMessageString = O9KeyController.getInstance(O9IMService.this).processAcceptMessage(o9message,myNewKey);
+					controller.sendMessage(processedMessageString);
+					break;
+				case KEY_ACCEPT:
+					String myKey = o9message.getReceiverPublicKey();
+					O9KeyController.getInstance(O9IMService.this).updateKeyPair(myKey,friendKey,message.getFrom());
+					for(EnquedMessage enquedMessage: getEnquedMessage(controller.getActualFriendLogin())) {
+						deleteEnquedMessage(enquedMessage);
+						sendMessage(enquedMessage.getMessage());
+					}
+					break;
+				
+				case MESSAGE:
+					
+					break;
+				default:
+					break;
+				
+	            }
+	            //showMessage(messageString, false);
 	        }
 	    };
 	
@@ -97,7 +131,13 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
         if(list != null && list.size() > 0) {
         	User user = list.get(0);
         	if(user.getPassword() != null && user.getPassword().trim().length() > 0) {
-        		setUpController(user.getUsername(), user.getPassword());
+        		try {
+        			setUpController(user.getUsername(), user.getPassword());
+        		}
+        		catch (Exception e){
+        			android.util.Log.d(TAG, e.getMessage(), e);
+        		}
+        		
         	}
         }
 
@@ -219,11 +259,12 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	public List<QBUser> getFriendList() {
 		
 		final ArrayList<QBUser> listresult = new ArrayList<QBUser>();
-		SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, FriendId.class);
-		List<FriendId> friendsids = dao.get(FriendId.class);
+		//SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, FriendId.class);
+		//List<FriendId> friendsids = dao.get(FriendId.class);
 		LinkedList<String> list = new LinkedList<String>();
-		for(FriendId id: friendsids) {
-			list.add(id.get_id());
+		Collection<RosterEntry> rosterEntries = controller.getRoster().getEntries();
+		for(RosterEntry entry: rosterEntries) {
+			list.add(entry.getUser());
 		}
 		QBUsers.getUsersByIDs(list, new QBCallback() {
 			
@@ -260,7 +301,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	}
 
 	@Override
-	public void setUpController(String user, String password) {
+	public void setUpController(String user, String password) throws XMPPException {
 		if(controller != null) {
 			controller = new O9ChatController(user, password);
 			controller.setOnMessageReceivedListener(onMessageReceivedListener);
@@ -284,7 +325,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		
 		else {
 			enqueMessage(messageString, controller.getActualFriendLogin());
-			String newPublicKeyRepo = O9KeyController.getInstance(this).generatePublicKey(controller.getActualFriendLogin());
+			String newPublicKeyRepo = O9KeyController.getInstance(this).generatePublicKey(controller.getActualFriendLogin(),null);
 			String processedMessageString = O9KeyController.getInstance(this).processExchangeMessage(newPublicKeyRepo);
 			controller.sendMessage(processedMessageString);
 		}
@@ -296,9 +337,29 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		return O9KeyController.getInstance(this).getByFriendLogin(friend).getFriendKey();
 	}
 	
-	private String enqueMessage(String message, String friendLogin) {
-		throw new UnsupportedOperationException("Method need to be dfined");
+	private void enqueMessage(String message, String friendLogin) {
+		SQLiteDAO enqueer = SQLiteDAO.getInstance(this, EnquedMessage.class);
+		EnquedMessage enquedMessage = new EnquedMessage(System.currentTimeMillis(), message, friendLogin);
+		enqueer.insert(enquedMessage);
 	}
+	
+	private List<EnquedMessage> getEnquedMessage(String friendLogin) {
+		SQLiteDAO enqueer = SQLiteDAO.getInstance(this, EnquedMessage.class);
+		return enqueer.get(EnquedMessage.class, "to=?", new String[]{friendLogin}, "timestamp");
+		
+	}
+	
+	private void deleteEnquedMessage(EnquedMessage message) {
+		SQLiteDAO enqueer = SQLiteDAO.getInstance(this, EnquedMessage.class);
+		enqueer.delete(EnquedMessage.class, "_id=", message.get_id());
+	}
+
+	@Override
+	public Presence getPresence(String user) {
+		return controller.getRoster().getPresence(user);
+	}
+	
+
 
 	
    

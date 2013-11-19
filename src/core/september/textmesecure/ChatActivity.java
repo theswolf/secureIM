@@ -82,7 +82,7 @@ public class ChatActivity extends O9BaseActivity {
            // myChatController = new MyChatController(chatLogin, password);
            // myChatController.setOnMessageReceivedListener(onMessageReceivedListener);
 
-            imService.setUpController(chatLogin, password);
+            //imService.setUpController(chatLogin, password);
             // ================= QuickBlox ===== Step 7 =================
             // Get friend's login based on QuickBlox user account.
             // Note, that for your companion you should use full chat login,

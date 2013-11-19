@@ -36,19 +36,26 @@ public class O9KeyController {
 		O9Message o9Message = new O9Message();
 		o9Message.setType(O9Message.Type.MESSAGE);
 		o9Message.setEncryptedMessage(cipheredText);
-		o9Message.setMyPublicKey(repo.getMyPublicKey());
-		o9Message.setFriendPublicKey(repo.getFriendKey());
+		o9Message.setSenderPublicKey(repo.getMyPublicKey());
+		o9Message.setReceiverPublicKey(repo.getFriendKey());
 		return o9Message.toString();
 	}
 	
 	public String processExchangeMessage(String myPublicKey) {
 		O9Message o9Message = new O9Message();
 		o9Message.setType(O9Message.Type.KEY_EXCHANGE);
-		o9Message.setMyPublicKey(myPublicKey);
+		o9Message.setSenderPublicKey(myPublicKey);
 		return o9Message.toString();
 	}
 	
-	public String generatePublicKey(String actualFriendLogin) {
+	public String processAcceptMessage(O9Message o9Message,String myNewPublicKey) {
+		o9Message.setType(O9Message.Type.KEY_ACCEPT);
+		o9Message.setReceiverPublicKey(o9Message.getSenderPublicKey());
+		o9Message.setSenderPublicKey(myNewPublicKey);
+		return o9Message.toString();
+	}
+	
+	public String generatePublicKey(String actualFriendLogin,String friendKey) {
 		KeyRepo repo = O9Cypher.getInstance().generateKey(actualFriendLogin);
 		 SQLiteDAO dao = SQLiteDAO.getInstance(context, User.class);
 	     User me = dao.get(User.class).get(0);
@@ -66,6 +73,9 @@ public class O9KeyController {
 		default:
 			break;
 		}
+	    if(friendKey!= null) {
+	    	repo.setFriendKey(friendKey);
+	    }
 	    repo.setFriendLogin(actualFriendLogin);
 	    dao = SQLiteDAO.getInstance(context, KeyRepo.class);
 	    dao.insert(repo);
@@ -76,5 +86,14 @@ public class O9KeyController {
 		repo.setTTL(repo.getTTL()-1);
 		SQLiteDAO keyDao = SQLiteDAO.getInstance(context, KeyRepo.class);
 		keyDao.update(repo, "_id=?", ""+repo.get_id());
+	}
+	public void updateKeyPair(String myKey, String friendKey, String friendLogin) {
+		SQLiteDAO keyDao = SQLiteDAO.getInstance(context, KeyRepo.class);
+		List<KeyRepo> repoResults = keyDao.get(KeyRepo.class, "myPublicKey=? and friendLogin=?",myKey,friendLogin);
+		for(KeyRepo repoResult: repoResults) {
+			repoResult.setFriendKey(friendKey);
+			keyDao.update(repoResult, "myPublicKey=? and friendLogin=?", myKey,friendLogin);
+		}
+		
 	}
 }

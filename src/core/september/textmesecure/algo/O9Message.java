@@ -6,12 +6,13 @@ public class O9Message {
 	
 	public enum Type {
 		KEY_EXCHANGE,
+		KEY_ACCEPT,
 		MESSAGE
 	}
 	
 	private Type type;
-	private String myPublicKey;
-	private String friendPublicKey;
+	private String senderPublicKey;
+	private String receiverPublicKey;
 	private String encryptedMessage;
 	public Type getType() {
 		return type;
@@ -19,17 +20,17 @@ public class O9Message {
 	public void setType(Type type) {
 		this.type = type;
 	}
-	public String getMyPublicKey() {
-		return myPublicKey;
+	public String getSenderPublicKey() {
+		return senderPublicKey;
 	}
-	public void setMyPublicKey(String myPublicKey) {
-		this.myPublicKey = myPublicKey;
+	public void setSenderPublicKey(String myPublicKey) {
+		this.senderPublicKey = myPublicKey;
 	}
-	public String getFriendPublicKey() {
-		return friendPublicKey;
+	public String getReceiverPublicKey() {
+		return receiverPublicKey;
 	}
-	public void setFriendPublicKey(String friendPublicKey) {
-		this.friendPublicKey = friendPublicKey;
+	public void setReceiverPublicKey(String friendPublicKey) {
+		this.receiverPublicKey = friendPublicKey;
 	}
 	public String getEncryptedMessage() {
 		return encryptedMessage;
@@ -42,6 +43,11 @@ public class O9Message {
 	public String toString() {
 		Gson gson = new Gson();
 		return gson.toJson(this);
+	}
+	
+	public static O9Message fromString(String input) {
+		Gson gson = new Gson();
+		return gson.fromJson(input, O9Message.class);
 	}
 
 	

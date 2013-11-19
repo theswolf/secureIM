@@ -41,9 +41,18 @@ public class O9ChatController {
 
     private ChatManager chatManager;
 
-    public O9ChatController(String chatLogin, String password) {
+    public O9ChatController(String chatLogin, String password) throws XMPPException {
         this.chatLogin = chatLogin;
         this.password = password;
+        Connection.DEBUG_ENABLED = true;
+        config = new ConnectionConfiguration(CHAT_SERVER);
+        connection = new XMPPConnection(config);
+        connection.connect();
+        connection.login(chatLogin, password);
+    }
+    
+    public Roster getRoster() {
+    	return connection.getRoster();
     }
 
     public void startChat(String buddyLogin) {
@@ -53,24 +62,20 @@ public class O9ChatController {
             @Override
             public void run() {
                 // Chat action 1 -- create connection.
-                Connection.DEBUG_ENABLED = true;
-                config = new ConnectionConfiguration(CHAT_SERVER);
-                connection = new XMPPConnection(config);
+               
 
                 try {
-                    connection.connect();
-                    connection.login(chatLogin, password);
 
                     // Chat action 2 -- create chat manager.
                     chatManager = connection.getChatManager();
-
+                    //connection.getRoster().getPresence(buddyLogin).
                     // Chat action 3 -- create chat.
                     chat = chatManager.createChat(friendLogin, messageListener);
-
+                   
                     // Set listener for outcoming messages.
                     chatManager.addChatListener(chatManagerListener);
 
-                } catch (XMPPException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

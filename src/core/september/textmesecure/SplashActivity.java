@@ -19,6 +19,7 @@ import com.quickblox.core.QBSettings;
 import com.quickblox.core.result.Result;
 import com.quickblox.module.auth.QBAuth;
 
+import core.september.textmesecure.configs.Config;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
 import core.september.textmesecure.sql.models.User;
@@ -101,6 +102,9 @@ public class SplashActivity extends O9BaseActivity  implements QBCallback {
         switch (route) {
 		case READY_TO_START:
 			 intent = new Intent(this, UsersListActivity.class);
+			 intent.putExtra(Config.MY_ID, user.get_id());
+			 intent.putExtra(Config.MY_LOGIN, user.getUsername());
+			 intent.putExtra(Config.MY_PASSWORD, user.getPassword());
 	            startActivity(intent);
 			break;
 		case NEED_SIGNIN:

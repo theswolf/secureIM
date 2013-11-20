@@ -14,4 +14,5 @@ public class Config {
 	public static final String USER_LOGIN = "USER_LOGIN";
 	public static final String _CHAT_LOGIN = "CHAT_LOGIN";
 	public static final String USER_STATUS = "USER_STATUS";
+	public static final String USER_LIST_MENU = "USER_LIEST_MENU";
 }

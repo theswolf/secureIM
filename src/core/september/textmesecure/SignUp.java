@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
+import core.september.textmesecure.supertypes.O9BaseActivity;
 
 public class SignUp extends O9BaseActivity {
 	
@@ -40,7 +41,9 @@ public class SignUp extends O9BaseActivity {
 	private EditText eMailText;
 	private EditText passwordAgainText;
 	
-
+	@Override
+	public void onBackPressed() {}
+	
 	public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);    
 
@@ -50,6 +53,7 @@ public class SignUp extends O9BaseActivity {
 	        setTitle("Sign up");
 	        
 	        Button signUpButton = (Button) findViewById(R.id.registerButton);
+	        Button signInButton = (Button) findViewById(R.id.signInButton);
 	        //Button cancelButton = (Button) findViewById(R.id.cancel_signUp);
 	        usernameText = (EditText) findViewById(R.id.loginEdit);
 	        passwordText = (EditText) findViewById(R.id.passwordEdit);  
@@ -99,7 +103,16 @@ public class SignUp extends O9BaseActivity {
 				}       	
 	        });
 	        
-
+	        signInButton.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View arg0) {
+					// TODO Auto-generated method stub
+					Intent intent = new Intent(SignUp.this, SignIn.class);
+		            startActivity(intent);
+					
+				}
+			});
 	        
 	        
 	    }

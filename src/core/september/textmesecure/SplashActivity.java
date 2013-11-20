@@ -23,6 +23,7 @@ import core.september.textmesecure.configs.Config;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
 import core.september.textmesecure.sql.models.User;
+import core.september.textmesecure.supertypes.O9BaseActivity;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -86,7 +87,7 @@ public class SplashActivity extends O9BaseActivity  implements QBCallback {
         	route = Route.NEED_SIGNUP;
         }
         
-        QBSettings.getInstance().fastConfigInit("1028", "jCr7OwnvgV5wFmm", "4JmKPAnwN7ps5Xt");
+        QBSettings.getInstance().fastConfigInit("4696", "OYQ2G3syJAYCbpD", "nevsq5jds-eyS7n");
 
         // ================= QuickBlox ===== Step 2 =================
         // Authorize application.

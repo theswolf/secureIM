@@ -1,20 +1,21 @@
-package core.september.textmesecure;
+package core.september.textmesecure.supertypes;
 
-import core.september.textmesecure.interfaces.IAppManager;
-import core.september.textmesecure.services.O9IMService;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.v4.app.FragmentActivity;
+import core.september.textmesecure.R;
+import core.september.textmesecure.R.string;
+import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.services.O9IMService;
 
-public abstract class O9BaseActivity  extends Activity{
+public abstract class O9BaseFragmentActivity extends FragmentActivity{
+	protected IAppManager imService;
 	
-protected IAppManager imService;
-	
-protected ServiceConnection mConnection = new ServiceConnection() {
-        
+	protected ServiceConnection mConnection = new ServiceConnection() {
+	        
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
             // This is called when the connection with the service has been
@@ -51,6 +52,6 @@ protected ServiceConnection mConnection = new ServiceConnection() {
 		super.onPause();
 	}
 	
-
-
+	   
+		
 }

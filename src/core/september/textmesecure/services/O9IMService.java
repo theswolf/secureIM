@@ -358,6 +358,12 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	public Presence getPresence(String user) {
 		return controller.getRoster().getPresence(user);
 	}
+
+	@Override
+	public void addFriend(String login) throws XMPPException {
+		controller.getRoster().createEntry(login, login, new String[]{"friends"});
+		
+	}
 	
 
 

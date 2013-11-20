@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
+import core.september.textmesecure.supertypes.O9BaseActivity;
 
 public class SignIn extends O9BaseActivity {
 	
@@ -39,7 +40,13 @@ public class SignIn extends O9BaseActivity {
 	private EditText passwordText;
 	private Handler handler = new Handler();
 
-
+ 
+	@Override
+	public void onBackPressed() {
+		Intent intent = new Intent(this, SignUp.class);
+        startActivity(intent);
+	}
+	
 	public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);    
 

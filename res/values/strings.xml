@@ -42,10 +42,15 @@
     <string name="title_activity_splash">TextMe Secure</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="drawer_open">Menu</string>
+    <string name="drawer_close">TextMe Secure</string>
+    <string name="action_websearch">Search</string>
+    <string name="app_not_available">Sorry, there\'s no web browser available</string>
     <string-array name="lis_activity_menu">
+        <item>List Friends</item>
         <item>Add a friend</item>
-        <item>Clear history</item>
         <item>Import friend from contact</item>
+        <item>Clear history</item>
         <item>Edit my profile</item>
     </string-array>
 

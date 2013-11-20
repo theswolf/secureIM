@@ -31,6 +31,7 @@ public interface IAppManager {
 	public void startChat(String friendLogin);
 	public void sendMessage(String messageString);
 	public Presence getPresence(String user);
+	public void addFriend(String login) throws XMPPException;
 
 	
 }

@@ -11,6 +11,7 @@ import com.quickblox.module.chat.QBChat;
 import com.quickblox.module.users.model.QBUser;
 
 import core.september.textmesecure.configs.Config;
+import core.september.textmesecure.supertypes.O9BaseActivity;
 
 import org.jivesoftware.smack.packet.Message;
 

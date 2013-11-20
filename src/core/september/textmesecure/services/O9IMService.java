@@ -167,6 +167,11 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	{
 		return mBinder;
 	}
+	
+	@Override
+	  public int onStartCommand(Intent intent, int flags, int startId) {
+	    return Service.START_STICKY;
+	  }
 
 
 
@@ -207,13 +212,15 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 //	}
 
 
-	
-
-	public void signUpUser(String usernameText, String passwordText,String emailText) 
-	{
+	private void storeUser(String usernameText, String passwordText,String emailText)  {
 		SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
 		dao.delete(User.class, "_id=?", "0");
 		dao.insert(new User(0, usernameText, passwordText, emailText, SubscriptionType.BASIC));
+	}
+
+	public void signUpUser(String usernameText, String passwordText,String emailText) 
+	{
+		storeUser(usernameText, passwordText, emailText);
 		
 		user = new QBUser(usernameText, passwordText, emailText);
 		QBUsers.signUpSignInTask(user, O9IMService.this);
@@ -222,7 +229,8 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	
 	public void signInUser(String usernameText, String passwordText) 
 	{
-
+		storeUser(usernameText, passwordText, null);
+		
 		user = new QBUser(usernameText, passwordText);
 		QBUsers.signIn(user, O9IMService.this);
 	}
@@ -236,7 +244,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            intent.putExtra(Config.MY_ID, user.getId());
 	            intent.putExtra(Config.MY_LOGIN, user.getLogin());
 	            intent.putExtra(Config.MY_PASSWORD, user.getPassword());
-
+	            setUpController();
 	            startActivity(intent);
 	            Toast.makeText(this, "You've been successfully logged in application",
 	                    Toast.LENGTH_SHORT).show();
@@ -302,9 +310,29 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 
 	@Override
 	public void setUpController(String user, String password) throws XMPPException {
-		if(controller != null) {
+		if(controller == null) {
 			controller = new O9ChatController(user, password);
 			controller.setOnMessageReceivedListener(onMessageReceivedListener);
+		}
+		
+	}
+	
+	private void setUpController() {
+		if(controller == null) {
+			SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
+	        List<User> list = dao.get(User.class);
+	        
+	        if(list != null && list.size() > 0) {
+	        	User user = list.get(0);
+	        	if(user.getPassword() != null && user.getPassword().trim().length() > 0) {
+	        		try {
+	        			setUpController(user.getUsername(), user.getPassword());
+	        		}
+	        		catch (Exception e){
+	        			android.util.Log.d(TAG, e.getMessage(), e);
+	        		}
+	        	}
+	        }
 		}
 		
 	}

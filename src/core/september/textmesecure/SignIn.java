@@ -67,18 +67,7 @@ public class SignIn extends O9BaseActivity {
 						)
 					{
 						//TODO check email adress is valid
-						
-							
-									Thread thread = new Thread(){
-										String result = new String();
-										@Override
-										public void run() {
-											imService.signInUser(usernameText.getText().toString(), passwordText.getText().toString());
-										}
-									};
-									thread.start();
-		
-						
+									signinUser();
 					}
 					else {
 						showDialog(FILL_ALL_FIELDS);
@@ -91,6 +80,11 @@ public class SignIn extends O9BaseActivity {
 	        
 	        
 	    }
+	
+	
+	private void signinUser() {
+		imService.signInUser(usernameText.getText().toString(), passwordText.getText().toString());
+	}
 	
 	
 	protected Dialog onCreateDialog(int id) 

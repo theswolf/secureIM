@@ -124,7 +124,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 
 		// Display a notification about us starting.  We put an icon in the status bar.
 		//   showNotification();
-		conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		//conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
         List<User> list = dao.get(User.class);
         

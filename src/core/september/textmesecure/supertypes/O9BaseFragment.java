@@ -1,10 +1,14 @@
 package core.september.textmesecure.supertypes;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ListFragment;
 import core.september.textmesecure.R;
+import core.september.textmesecure.SplashActivity;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
 
@@ -35,4 +39,10 @@ public abstract class O9BaseFragment extends ListFragment{
         	android.util.Log.d(TAG, getResources().getString(R.string.local_service_stopped));
         }
     };
+    
+    @Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+    	getActivity().startService(new Intent(getActivity(),  O9IMService.class));
+		super.onActivityCreated(savedInstanceState);
+	}
 }

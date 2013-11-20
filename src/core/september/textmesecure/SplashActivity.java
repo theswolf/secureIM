@@ -43,8 +43,7 @@ public class SplashActivity extends O9BaseActivity  implements QBCallback {
 	
 	private User user = null;
 	private Route route;
-	
-		
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +67,7 @@ public class SplashActivity extends O9BaseActivity  implements QBCallback {
         // Initialize QuickBlox application with credentials.
         // Getting app credentials -- http://quickblox.com/developers/Getting_application_credentials
         
-        startService(new Intent(SplashActivity.this,  O9IMService.class));
+       
         
         SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
         List<User> list = dao.get(User.class);

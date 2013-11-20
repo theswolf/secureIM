@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import core.september.textmesecure.R;
@@ -38,6 +39,12 @@ public abstract class O9BaseFragmentActivity extends FragmentActivity{
         	android.util.Log.d(TAG, getResources().getString(R.string.local_service_stopped));
         }
     };
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
+    	startService(new Intent(this,  O9IMService.class));
+    }
     
 	@Override
 	protected void onResume() {

@@ -40,17 +40,16 @@ public class SignIn extends O9BaseActivity {
 	private EditText passwordText;
 	private Handler handler = new Handler();
 
- 
+	 
 	@Override
 	public void onBackPressed() {
 		Intent intent = new Intent(this, SignUp.class);
         startActivity(intent);
 	}
-	
+
 	public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);    
 
-	    
 	               
 	        setContentView(R.layout.activity_signin);
 	        setTitle("Sign In");

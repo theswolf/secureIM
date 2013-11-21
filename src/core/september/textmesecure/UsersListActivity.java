@@ -30,7 +30,8 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	    protected void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
 	        setContentView(R.layout.activity_users_list);
-	        bundle = savedInstanceState;
+	        bundle = savedInstanceState == null ? new Bundle() : savedInstanceState;
+	       
 	        mTitle = mDrawerTitle = getTitle();
 	        mMenuTitles = getResources().getStringArray(R.array.lis_activity_menu);
 	        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -88,7 +89,8 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	        }
 	    }
 	    
-	    private void selectItem(int position) {
+	    @Override
+	    public void selectItem(int position) {
 	        // update the main content by replacing fragments
 	        Fragment fragment = FragmentFactory.getFragment(position);
 	        //((Bundle args = new Bundle();

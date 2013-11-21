@@ -25,6 +25,7 @@ public class KeyRepo {
 	private String friendKey;
 	
 	
+	public KeyRepo() {}
 	
 	public long get_id() {
 		return _id;

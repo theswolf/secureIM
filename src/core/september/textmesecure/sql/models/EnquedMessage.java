@@ -19,6 +19,9 @@ public class EnquedMessage {
 		this.message = message;
 		this.to = to;
 	}
+	
+	public EnquedMessage() {}
+	
 	public String get_id() {
 		return _id;
 	}

@@ -32,14 +32,15 @@ import core.september.textmesecure.supertypes.O9BaseFragment;
 public class UserListFragment extends O9BaseFragment {
 	private ListView usersList;
 	private ProgressDialog progressDialog;
+	private View view;
+	
 
 	private final static String TAG = UserListFragment.class.getSimpleName();
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_user_list_layout, null);
-
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+		view = inflater.inflate(R.layout.fragment_user_list_layout, null);
+		usersList = (ListView) view.findViewById(R.layout.fragment_user_list_layout);
 		progressDialog = new ProgressDialog(getActivity());
 		progressDialog.setMessage("Loading fiends list");
 		progressDialog.show();
@@ -54,63 +55,130 @@ public class UserListFragment extends O9BaseFragment {
 		// ================= QuickBlox ===== Step 4 =================
 		// Get all users of QB application.
 
-		try {
-			imService.setUpController(login, password);
-		} catch (XMPPException e) {
-			// TODO Auto-generated catch block
-			android.util.Log.d(TAG, e.getMessage(), e);
-		}
+//		try {
+//			getService().setUpController(login, password);
+//		} catch (XMPPException e) {
+//			// TODO Auto-generated catch block
+//			android.util.Log.d(TAG, e.getMessage(), e);
+//		}
 		// imService.getFriendList();
 
-		final List<QBUser> users = imService.getFriendList();
-		ArrayList<Map<String, String>> usersListForAdapter = new ArrayList<Map<String, String>>();
-
-		for (QBUser u : users) {
-			Map<String, String> umap = new HashMap<String, String>();
-			umap.put(Config.USER_LOGIN, u.getLogin());
-			// umap.put(Config.CHAT_LOGIN, QBChat.getChatLoginFull(u));
-			Presence availability = imService.getPresence(u.getLogin());
-			Mode userMode = availability.getMode();
-			umap.put(Config.USER_STATUS,
-					retrieveState_mode(userMode, availability.isAvailable()));
-			usersListForAdapter.add(umap);
-		}
-
-		// Put users list into adapter.
-		SimpleAdapter usersAdapter = new SimpleAdapter(getActivity(),
-				usersListForAdapter, android.R.layout.simple_list_item_2,
-				new String[] { Config.USER_LOGIN, Config.USER_STATUS },
-				new int[] { android.R.id.text1, android.R.id.text2 });
-
-		usersList.setAdapter(usersAdapter);
-		usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int i, long l) {
-
-				// Prepare QBUser objects to pass it into next activities using
-				// bundle.
-				QBUser friendUser = users.get(i);
-
-				Intent intent = new Intent(getActivity(), ChatActivity.class);
-				Bundle extras = getActivity().getIntent().getExtras();
-				intent.putExtra(Config.FRIEND_ID, friendUser.getId());
-				intent.putExtra(Config.FRIEND_LOGIN, friendUser.getLogin());
-				intent.putExtra(Config.FRIEND_PASSWORD,
-						friendUser.getPassword());
-				// Add extras from previous activity.
-				intent.putExtras(extras);
-
-				startActivity(intent);
-			}
-		});
+//		final List<QBUser> users = getService().getFriendList();
+//		ArrayList<Map<String, String>> usersListForAdapter = new ArrayList<Map<String, String>>();
+//
+//		for (QBUser u : users) {
+//			Map<String, String> umap = new HashMap<String, String>();
+//			umap.put(Config.USER_LOGIN, u.getLogin());
+//			// umap.put(Config.CHAT_LOGIN, QBChat.getChatLoginFull(u));
+//			Presence availability = getService().getPresence(u.getLogin());
+//			Mode userMode = availability.getMode();
+//			umap.put(Config.USER_STATUS,
+//					retrieveState_mode(userMode, availability.isAvailable()));
+//			usersListForAdapter.add(umap);
+//		}
+//
+//		// Put users list into adapter.
+//		SimpleAdapter usersAdapter = new SimpleAdapter(getActivity(),
+//				usersListForAdapter, android.R.layout.simple_list_item_2,
+//				new String[] { Config.USER_LOGIN, Config.USER_STATUS },
+//				new int[] { android.R.id.text1, android.R.id.text2 });
+//
+//		usersList.setAdapter(usersAdapter);
+//		usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//			@Override
+//			public void onItemClick(AdapterView<?> adapterView, View view,
+//					int i, long l) {
+//
+//				// Prepare QBUser objects to pass it into next activities using
+//				// bundle.
+//				QBUser friendUser = users.get(i);
+//
+//				Intent intent = new Intent(getActivity(), ChatActivity.class);
+//				Bundle extras = getActivity().getIntent().getExtras();
+//				intent.putExtra(Config.FRIEND_ID, friendUser.getId());
+//				intent.putExtra(Config.FRIEND_LOGIN, friendUser.getLogin());
+//				intent.putExtra(Config.FRIEND_PASSWORD,
+//						friendUser.getPassword());
+//				// Add extras from previous activity.
+//				intent.putExtras(extras);
+//
+//				startActivity(intent);
+//			}
+//		});
 
 		return view;
 	}
-
+	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+	}
+	
+	@Override
+	public void onResume() {
+		//super.onResume();
+		progressDialog.hide();
+		
+		Thread thread = new Thread()
+		{
+		    @Override
+		    public void run() {
+		        try {
+		            while(getService() == null) {
+		                sleep(1000);
+		            }
+		            
+		            final List<QBUser> users = getService().getFriendList();
+		    		ArrayList<Map<String, String>> usersListForAdapter = new ArrayList<Map<String, String>>();
+
+		    		for (QBUser u : users) {
+		    			Map<String, String> umap = new HashMap<String, String>();
+		    			umap.put(Config.USER_LOGIN, u.getLogin());
+		    			// umap.put(Config.CHAT_LOGIN, QBChat.getChatLoginFull(u));
+		    			Presence availability = getService().getPresence(u.getLogin());
+		    			Mode userMode = availability.getMode();
+		    			umap.put(Config.USER_STATUS,
+		    					retrieveState_mode(userMode, availability.isAvailable()));
+		    			usersListForAdapter.add(umap);
+		    		}
+
+		    		// Put users list into adapter.
+		    		SimpleAdapter usersAdapter = new SimpleAdapter(getActivity(),
+		    				usersListForAdapter, android.R.layout.simple_list_item_2,
+		    				new String[] { Config.USER_LOGIN, Config.USER_STATUS },
+		    				new int[] { android.R.id.text1, android.R.id.text2 });
+
+		    		usersList.setAdapter(usersAdapter);
+		    		usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		    			@Override
+		    			public void onItemClick(AdapterView<?> adapterView, View view,
+		    					int i, long l) {
+
+		    				// Prepare QBUser objects to pass it into next activities using
+		    				// bundle.
+		    				QBUser friendUser = users.get(i);
+
+		    				Intent intent = new Intent(getActivity(), ChatActivity.class);
+		    				Bundle extras = getActivity().getIntent().getExtras();
+		    				intent.putExtra(Config.FRIEND_ID, friendUser.getId());
+		    				intent.putExtra(Config.FRIEND_LOGIN, friendUser.getLogin());
+		    				intent.putExtra(Config.FRIEND_PASSWORD,
+		    						friendUser.getPassword());
+		    				// Add extras from previous activity.
+		    				intent.putExtras(extras);
+
+		    				startActivity(intent);
+		    			}
+		    		});
+		            
+		        } catch (InterruptedException e) {
+		            e.printStackTrace();
+		        }
+		    }
+		};
+		
+		handler.post(thread);
+		super.onResume();
 	}
 
 	private static String retrieveState_mode(Mode userMode, boolean isOnline) {

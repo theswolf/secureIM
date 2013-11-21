@@ -29,6 +29,7 @@ import core.september.textmesecure.configs.Utils;
 import core.september.textmesecure.fragments.adapters.CheckBoxAdapter;
 import core.september.textmesecure.fragments.models.CheckBoxModel;
 import core.september.textmesecure.supertypes.O9BaseFragment;
+import core.september.textmesecure.supertypes.O9BaseFragmentActivity;
 
 public class AddUserFragment extends O9BaseFragment implements QBCallback{
 	private ListView usersList;
@@ -42,7 +43,7 @@ public class AddUserFragment extends O9BaseFragment implements QBCallback{
 		View view = inflater.inflate(R.layout.fragment_add_friend_layout, null);
 
 		addFriendButton = (Button) view.findViewById(R.id.searchFriendButton);
-		usersList = (ListView) view.findViewById(R.id.usersList);
+		usersList = (ListView) view.findViewById(android.R.id.list);
 		final TextView textView = (TextView) view.findViewById(R.id.textView);
 		
 		addFriendButton.setOnClickListener(new OnClickListener() {
@@ -94,7 +95,7 @@ public class AddUserFragment extends O9BaseFragment implements QBCallback{
 						for(CheckBoxModel model: modelList) {
 							if(model.isSelected()) {
 								try {
-									imService.addFriend(model.getLogin());
+									getService().addFriend(model.getLogin());
 								} catch (XMPPException e) {
 									// TODO Auto-generated catch block
 									AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
@@ -104,6 +105,7 @@ public class AddUserFragment extends O9BaseFragment implements QBCallback{
 							}
 						}
 						
+						((O9BaseFragmentActivity)getActivity()).selectItem(0);
 					}
 				});
 			}

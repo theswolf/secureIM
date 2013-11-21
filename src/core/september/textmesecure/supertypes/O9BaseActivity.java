@@ -34,19 +34,19 @@ protected ServiceConnection mConnection= new ServiceConnection() {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-    	 startService(new Intent(this,  O9IMService.class));
+    	 getApplicationContext().startService(new Intent(this,  O9IMService.class));
     }
     
 	@Override
 	protected void onResume() {
-		getApplicationContext().bindService(new Intent(this, this.getClass()), mConnection , Context.BIND_AUTO_CREATE);   
+		getApplicationContext().bindService(new Intent(this,O9IMService.class), this.mConnection , Context.BIND_AUTO_CREATE);   
 		super.onResume();
 	}
 	
 	@Override
 	protected void onPause() 
 	{
-		getApplicationContext().unbindService(mConnection);
+		getApplicationContext().unbindService(this.mConnection);
 		super.onPause();
 	}
 	

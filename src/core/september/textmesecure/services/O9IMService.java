@@ -165,6 +165,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	@Override
 	public IBinder onBind(Intent intent) 
 	{
+		setUpController();
 		return mBinder;
 	}
 	
@@ -244,6 +245,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            intent.putExtra(Config.MY_ID, user.getId());
 	            intent.putExtra(Config.MY_LOGIN, user.getLogin());
 	            intent.putExtra(Config.MY_PASSWORD, user.getPassword());
+	            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	            setUpController();
 	            startActivity(intent);
 	            Toast.makeText(this, "You've been successfully logged in application",

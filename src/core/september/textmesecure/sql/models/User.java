@@ -37,6 +37,8 @@ public class User {
 		this.email = email;
 		this.subscriptionType = subscriptionType;
 	}
+	
+	public User() {}
 
 	
 	

@@ -89,6 +89,12 @@
         <activity android:name="core.september.textmesecure.SignIn"
                   android:label="Sign In">
         </activity>
+         <activity android:name="core.september.textmesecure.UsersListActivity"
+                  android:label="Friends">
+        </activity>
+         <activity android:name="core.september.textmesecure.ChatActivity"
+                  android:label="Chat">
+        </activity>
          <service android:name="core.september.textmesecure.services.O9IMService" 
              android:enabled="true">
         </service>

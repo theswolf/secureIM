@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.widget.Toast;
 
 import com.niusounds.asd.SQLiteDAO;
@@ -43,7 +44,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	private boolean ret = false;
 	private final IBinder mBinder = new IMBinder();
 	private QBUser user;
-	private O9ChatController controller;
+	private static O9ChatController _controller;
 
 	public class IMBinder extends Binder {
 		public IAppManager getService() {
@@ -95,12 +96,12 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 				case KEY_EXCHANGE:
 					String myNewKey = O9KeyController.getInstance(O9IMService.this).generatePublicKey(message.getFrom(), friendKey);
 					String processedMessageString = O9KeyController.getInstance(O9IMService.this).processAcceptMessage(o9message,myNewKey);
-					controller.sendMessage(processedMessageString);
+					getController().sendMessage(processedMessageString);
 					break;
 				case KEY_ACCEPT:
 					String myKey = o9message.getReceiverPublicKey();
 					O9KeyController.getInstance(O9IMService.this).updateKeyPair(myKey,friendKey,message.getFrom());
-					for(EnquedMessage enquedMessage: getEnquedMessage(controller.getActualFriendLogin())) {
+					for(EnquedMessage enquedMessage: getEnquedMessage(getController().getActualFriendLogin())) {
 						deleteEnquedMessage(enquedMessage);
 						sendMessage(enquedMessage.getMessage());
 					}
@@ -115,8 +116,23 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            }
 	            //showMessage(messageString, false);
 	        }
+	        
+	       @Override
+	       public void onMessageReceived(String status) {
+	    	   if(status.equalsIgnoreCase("LOGGED")) {
+	    		   Intent intent = new Intent();
+	    		   intent.setAction("core.september.textmesecure.fragments.UserListFragment.loggedInReceiver");
+	    		   sendBroadcast(intent);
+	    	   }
+	       }
 	    };
 	
+	private O9ChatController getController() {
+	    	if(_controller == null) {
+	    		setUpController();
+	    	}
+	    	return _controller;
+	    }
 	@Override
 	public void onCreate() 
 	{   	
@@ -221,7 +237,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 
 	public void signUpUser(String usernameText, String passwordText,String emailText) 
 	{
-		storeUser(usernameText, passwordText, emailText);
+		//storeUser(usernameText, passwordText, emailText);
 		
 		user = new QBUser(usernameText, passwordText, emailText);
 		QBUsers.signUpSignInTask(user, O9IMService.this);
@@ -230,7 +246,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	
 	public void signInUser(String usernameText, String passwordText) 
 	{
-		storeUser(usernameText, passwordText, null);
+		//storeUser(usernameText, passwordText, null);
 		
 		user = new QBUser(usernameText, passwordText);
 		QBUsers.signIn(user, O9IMService.this);
@@ -247,6 +263,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            intent.putExtra(Config.MY_PASSWORD, user.getPassword());
 	            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	            setUpController();
+	            storeUser(user.getLogin(), user.getPassword(), user.getEmail());
 	            startActivity(intent);
 	            Toast.makeText(this, "You've been successfully logged in application",
 	                    Toast.LENGTH_SHORT).show();
@@ -272,7 +289,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		//SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, FriendId.class);
 		//List<FriendId> friendsids = dao.get(FriendId.class);
 		LinkedList<String> list = new LinkedList<String>();
-		Collection<RosterEntry> rosterEntries = controller.getRoster().getEntries();
+		Collection<RosterEntry> rosterEntries = getController().getRoster().getEntries();
 		for(RosterEntry entry: rosterEntries) {
 			list.add(entry.getUser());
 		}
@@ -312,15 +329,15 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 
 	@Override
 	public void setUpController(String user, String password) throws XMPPException {
-		if(controller == null) {
-			controller = new O9ChatController(user, password);
-			controller.setOnMessageReceivedListener(onMessageReceivedListener);
+		if(_controller == null) {
+			_controller = new O9ChatController(user, password);
+			_controller.setOnMessageReceivedListener(onMessageReceivedListener);
 		}
 		
 	}
 	
 	private void setUpController() {
-		if(controller == null) {
+		if(_controller == null) {
 			SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
 	        List<User> list = dao.get(User.class);
 	        
@@ -331,7 +348,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	        			setUpController(user.getUsername(), user.getPassword());
 	        		}
 	        		catch (Exception e){
-	        			android.util.Log.d(TAG, e.getMessage(), e);
+	        			android.util.Log.e(TAG, e.getMessage(), e);
 	        		}
 	        	}
 	        }
@@ -341,23 +358,23 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 
 	@Override
 	public void startChat(String friendLogin) {
-		controller.startChat(friendLogin);
+		getController().startChat(friendLogin);
 	}
 
 	@Override
 	public void sendMessage(String messageString) {
-		String friendKey = getFriendKeyFromLocalDB(controller.getActualFriendLogin());
+		String friendKey = getFriendKeyFromLocalDB(getController().getActualFriendLogin());
 		if(friendKey != null) {
-			String processedMessageString = O9KeyController.getInstance(this).processTextMessage(messageString,controller.getActualFriendLogin());
-			controller.sendMessage(processedMessageString);
-			O9KeyController.getInstance(this).decreaseTTL(controller.getActualFriendLogin());
+			String processedMessageString = O9KeyController.getInstance(this).processTextMessage(messageString,getController().getActualFriendLogin());
+			getController().sendMessage(processedMessageString);
+			O9KeyController.getInstance(this).decreaseTTL(getController().getActualFriendLogin());
 		}
 		
 		else {
-			enqueMessage(messageString, controller.getActualFriendLogin());
-			String newPublicKeyRepo = O9KeyController.getInstance(this).generatePublicKey(controller.getActualFriendLogin(),null);
+			enqueMessage(messageString, getController().getActualFriendLogin());
+			String newPublicKeyRepo = O9KeyController.getInstance(this).generatePublicKey(getController().getActualFriendLogin(),null);
 			String processedMessageString = O9KeyController.getInstance(this).processExchangeMessage(newPublicKeyRepo);
-			controller.sendMessage(processedMessageString);
+			getController().sendMessage(processedMessageString);
 		}
 		
 		
@@ -386,12 +403,12 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 
 	@Override
 	public Presence getPresence(String user) {
-		return controller.getRoster().getPresence(user);
+		return getController().getRoster().getPresence(user);
 	}
 
 	@Override
 	public void addFriend(String login) throws XMPPException {
-		controller.getRoster().createEntry(login, login, new String[]{"friends"});
+		getController().getRoster().createEntry(login, login, new String[]{"friends"});
 		
 	}
 	

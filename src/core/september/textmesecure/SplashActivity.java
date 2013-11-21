@@ -98,26 +98,27 @@ public class SplashActivity extends O9BaseActivity  implements QBCallback {
         progressBar.setVisibility(View.GONE);
 
         if (result.isSuccess()) {
-        	Intent intent;	
+        	Intent intent = null;	
         switch (route) {
 		case READY_TO_START:
 			 intent = new Intent(this, UsersListActivity.class);
 			 intent.putExtra(Config.MY_ID, user.get_id());
 			 intent.putExtra(Config.MY_LOGIN, user.getUsername());
 			 intent.putExtra(Config.MY_PASSWORD, user.getPassword());
-	            startActivity(intent);
+	            //startActivity(intent);
 			break;
 		case NEED_SIGNIN:
 			intent = new Intent(this, SignIn.class);
-	            startActivity(intent);
+	            //startActivity(intent);
 			break;
 		case NEED_SIGNUP:
 			 intent = new Intent(this, SignUp.class);
-	            startActivity(intent);
+	            //startActivity(intent);
 			break;
 		
 		}
-        	
+        startActivity(intent);
+        SplashActivity.this.finish();
            
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);

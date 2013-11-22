@@ -234,7 +234,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	@Override
 	public void onComplete(Result result) {
 		 if (result.isSuccess()) {
-	            Intent intent = new Intent(this, UsersListActivity.class);
+	            final Intent intent = new Intent(this, UsersListActivity.class);
 	            intent.putExtra(Config.MY_ID, user.getId());
 	            intent.putExtra(Config.MY_LOGIN, user.getLogin());
 	            intent.putExtra(Config.MY_PASSWORD, user.getPassword());
@@ -243,8 +243,10 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            storeUser(user.getLogin(), user.getPassword(), user.getEmail());
 	            setUpController();
 	            startActivity(intent);
-//	            Toast.makeText(this, "You've been successfully logged in application",
-//	                    Toast.LENGTH_SHORT).show();
+	            Intent intent2 = new Intent();
+	    		   intent2.setAction(UserListFragment.class.getName());
+	    		   sendBroadcast(intent2);
+
 	        } else {
 	        	handleErrors(result);
 	        }
@@ -358,15 +360,15 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 							String realLogin = QBChat.getChatLoginShort(user);
 							try {
 								try {
-									connection.disconnect();
+									connection.login(realLogin, user.getPassword());
 								}
 								catch (Throwable e) {
 									android.util.Log.d(TAG,e.getMessage(),e);
 								}
-								connection.login(realLogin, user.getPassword());
-								Intent intent = new Intent();
-					    		   intent.setAction(UserListFragment.class.getName());
-					    		   sendBroadcast(intent);
+								//connection.login(realLogin, user.getPassword());
+//								Intent intent = new Intent();
+//					    		   intent.setAction(UserListFragment.class.getName());
+//					    		   sendBroadcast(intent);
 								
 							} catch (Exception e) {
 								// TODO Auto-generated catch block

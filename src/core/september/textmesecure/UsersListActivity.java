@@ -64,7 +64,7 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	                ) {
 	            public void onDrawerClosed(View view) {
 	                getSupportActionBar().setTitle(mTitle);
-	                //this.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+	                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 	            }
 
 	            public void onDrawerOpened(View drawerView) {

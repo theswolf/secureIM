@@ -78,8 +78,7 @@ public class UserListFragment extends O9BaseFragment {
 	    				Bundle extras = getActivity().getIntent().getExtras();
 	    				intent.putExtra(Config.FRIEND_ID, friendUser.getId());
 	    				intent.putExtra(Config.FRIEND_LOGIN, friendUser.getLogin());
-	    				intent.putExtra(Config.FRIEND_PASSWORD,
-	    						friendUser.getPassword());
+	    				intent.putExtra(Config.FRIEND_PASSWORD,friendUser.getPassword());
 	    				// Add extras from previous activity.
 	    				intent.putExtras(extras);
 

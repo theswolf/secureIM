@@ -42,7 +42,54 @@ public class UserListFragment extends O9BaseFragment {
 		
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			loggedIn = true;
+        	try {
+	            
+	            final List<QBUser> users = getService().getFriendList();
+	    		ArrayList<Map<String, String>> usersListForAdapter = new ArrayList<Map<String, String>>();
+
+	    		for (QBUser u : users) {
+	    			Map<String, String> umap = new HashMap<String, String>();
+	    			umap.put(Config.USER_LOGIN, u.getLogin());
+	    			// umap.put(Config.CHAT_LOGIN, QBChat.getChatLoginFull(u));
+	    			Presence availability = getService().getPresence(u.getLogin());
+	    			Mode userMode = availability.getMode();
+	    			umap.put(Config.USER_STATUS,
+	    					retrieveState_mode(userMode, availability.isAvailable()));
+	    			usersListForAdapter.add(umap);
+	    		}
+
+	    		// Put users list into adapter.
+	    		SimpleAdapter usersAdapter = new SimpleAdapter(getActivity(),
+	    				usersListForAdapter, android.R.layout.simple_list_item_2,
+	    				new String[] { Config.USER_LOGIN, Config.USER_STATUS },
+	    				new int[] { android.R.id.text1, android.R.id.text2 });
+
+	    		usersList.setAdapter(usersAdapter);
+	    		usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+	    			@Override
+	    			public void onItemClick(AdapterView<?> adapterView, View view,
+	    					int i, long l) {
+
+	    				// Prepare QBUser objects to pass it into next activities using
+	    				// bundle.
+	    				QBUser friendUser = users.get(i);
+
+	    				Intent intent = new Intent(getActivity(), ChatActivity.class);
+	    				Bundle extras = getActivity().getIntent().getExtras();
+	    				intent.putExtra(Config.FRIEND_ID, friendUser.getId());
+	    				intent.putExtra(Config.FRIEND_LOGIN, friendUser.getLogin());
+	    				intent.putExtra(Config.FRIEND_PASSWORD,
+	    						friendUser.getPassword());
+	    				// Add extras from previous activity.
+	    				intent.putExtras(extras);
+
+	    				startActivity(intent);
+	    			}
+	    		});
+	            
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
 		}
 	};
 
@@ -67,71 +114,12 @@ public class UserListFragment extends O9BaseFragment {
 	
 	
 	
-	private class Connection extends AsyncTask {
-			 
-			        @Override
-			        protected Object doInBackground(Object... arg0) {
-			        	try {
-				            while(getService() == null && !loggedIn) { }
-				            
-				            final List<QBUser> users = getService().getFriendList();
-				    		ArrayList<Map<String, String>> usersListForAdapter = new ArrayList<Map<String, String>>();
-
-				    		for (QBUser u : users) {
-				    			Map<String, String> umap = new HashMap<String, String>();
-				    			umap.put(Config.USER_LOGIN, u.getLogin());
-				    			// umap.put(Config.CHAT_LOGIN, QBChat.getChatLoginFull(u));
-				    			Presence availability = getService().getPresence(u.getLogin());
-				    			Mode userMode = availability.getMode();
-				    			umap.put(Config.USER_STATUS,
-				    					retrieveState_mode(userMode, availability.isAvailable()));
-				    			usersListForAdapter.add(umap);
-				    		}
-
-				    		// Put users list into adapter.
-				    		SimpleAdapter usersAdapter = new SimpleAdapter(getActivity(),
-				    				usersListForAdapter, android.R.layout.simple_list_item_2,
-				    				new String[] { Config.USER_LOGIN, Config.USER_STATUS },
-				    				new int[] { android.R.id.text1, android.R.id.text2 });
-
-				    		usersList.setAdapter(usersAdapter);
-				    		usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-				    			@Override
-				    			public void onItemClick(AdapterView<?> adapterView, View view,
-				    					int i, long l) {
-
-				    				// Prepare QBUser objects to pass it into next activities using
-				    				// bundle.
-				    				QBUser friendUser = users.get(i);
-
-				    				Intent intent = new Intent(getActivity(), ChatActivity.class);
-				    				Bundle extras = getActivity().getIntent().getExtras();
-				    				intent.putExtra(Config.FRIEND_ID, friendUser.getId());
-				    				intent.putExtra(Config.FRIEND_LOGIN, friendUser.getLogin());
-				    				intent.putExtra(Config.FRIEND_PASSWORD,
-				    						friendUser.getPassword());
-				    				// Add extras from previous activity.
-				    				intent.putExtras(extras);
-
-				    				startActivity(intent);
-				    			}
-				    		});
-				            
-				        } catch (Exception e) {
-				            e.printStackTrace();
-				        }
-			        	
-			        	return null;
-			        }
-			 
-			    };
 	
 	@Override
 	public void onResume() {
 		//super.onResume();
 		progressDialog.hide();
-		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(loggedInReceiver,new IntentFilter("core.september.textmesecure.fragments.UserListFragment.loggedInReceiver"));
-		new Connection().execute();
+		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(loggedInReceiver,new IntentFilter(UserListFragment.class.getName()));
 		super.onResume();
 	}
 	

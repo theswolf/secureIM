@@ -58,58 +58,23 @@ public class O9ChatController {
 
 	private ChatManager chatManager;
 
-	private class ConnectionManager extends AsyncTask {
-
-		@Override
-		protected Object doInBackground(Object... params) {
-			try {
-				connection.connect();
-				QBUsers.getUserByLogin(chatLogin, new QBCallback() {
-
-					@Override
-					public void onComplete(Result arg0, Object arg1) {
-						// TODO Auto-generated method stub
-
-					}
-
-					@Override
-					public void onComplete(Result result) {
-						if (result.isSuccess()) {
-							QBUserPagedResult pagedResult = (QBUserPagedResult) result;
-							QBUser user = pagedResult.getUsers().get(0);
-							String realLogin = QBChat.getChatLoginShort(user);
-							try {
-								connection.login(chatLogin, password);
-								if (onMessageReceivedListener != null) {
-									onMessageReceivedListener.onMessageReceived("LOGGED");
-								}
-								
-							} catch (XMPPException e) {
-								// TODO Auto-generated catch block
-								android.util.Log.d(TAG,e.getMessage(),e);
-							}
-
-						}
-
-					}
-				});
-
-			} catch (XMPPException e) {
-				e.printStackTrace();
-			}
-
-			return null;
-		}
-	}
-
+	
 	public O9ChatController(String chatLogin, String password)
 			throws XMPPException {
 		this.chatLogin = chatLogin;
 		this.password = password;
 		Connection.DEBUG_ENABLED = true;
 		config = new ConnectionConfiguration(CHAT_SERVER);
+		//connection = new XMPPConnection(config);
+		//new ConnectionManager().execute();
+	}
+	
+	public XMPPConnection getConnection() {
+		return connection;
+	}
+	
+	public void setUpConnection() {
 		connection = new XMPPConnection(config);
-		new ConnectionManager().execute();
 	}
 
 	public Roster getRoster() {

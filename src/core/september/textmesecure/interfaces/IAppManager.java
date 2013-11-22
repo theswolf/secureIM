@@ -24,7 +24,7 @@ public interface IAppManager {
 	public void signUpUser(String usernameText, String passwordText, String email);
 	public void signInUser(String usernameText, String passwordText);
 	public List<QBUser> getFriendList();
-	public void setUpController(String user, String password) throws XMPPException;
+	//public void setUpController(String user, String password) throws XMPPException;
 //	public String addNewFriendRequest(String friendUsername);
 //	public String sendFriendsReqsResponse(String approvedFriendNames,
 //			String discardedFriendNames);

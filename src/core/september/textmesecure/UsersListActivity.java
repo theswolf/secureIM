@@ -2,19 +2,24 @@ package core.september.textmesecure;
 
 
 
-import core.september.textmesecure.configs.Config;
-import core.september.textmesecure.supertypes.FragmentFactory;
-import core.september.textmesecure.supertypes.O9BaseFragmentActivity;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import core.september.textmesecure.configs.Config;
+import core.september.textmesecure.supertypes.FragmentFactory;
+import core.september.textmesecure.supertypes.O9BaseFragmentActivity;
 
 public class UsersListActivity extends O9BaseFragmentActivity{
 
@@ -45,8 +50,8 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
 	        // enable ActionBar app icon to behave as action to toggle nav drawer
-	        //getActionBar().setDisplayHomeAsUpEnabled(true);
-	        //getActionBar().setHomeButtonEnabled(true);
+	        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+	        getSupportActionBar().setHomeButtonEnabled(true);
 
 	        // ActionBarDrawerToggle ties together the the proper interactions
 	        // between the sliding drawer and the action bar app icon
@@ -58,12 +63,12 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	                R.string.drawer_close  /* "close drawer" description for accessibility */
 	                ) {
 	            public void onDrawerClosed(View view) {
-	                //getActionBar().setTitle(mTitle);
-	                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+	                getSupportActionBar().setTitle(mTitle);
+	                //this.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 	            }
 
 	            public void onDrawerOpened(View drawerView) {
-	                //getActionBar().setTitle(mDrawerTitle);
+	            	 getSupportActionBar().setTitle(mTitle);
 	                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 	            }
 	        };
@@ -88,6 +93,48 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	            selectItem(position);
 	        }
 	    }
+	    
+	    
+	    @Override
+	    public boolean onCreateOptionsMenu(Menu menu) {
+	        //MenuInflater inflater = getSupportMenuInflater();
+	        //inflater.inflate(R.menu.main, menu);
+	        return super.onCreateOptionsMenu(menu);
+	    }
+//
+//	    /* Called whenever we call invalidateOptionsMenu() */
+	    @Override
+	    public boolean onPrepareOptionsMenu(Menu menu) {
+	        // If the nav drawer is open, hide action items related to the content view
+	        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+	        //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+	        return super.onPrepareOptionsMenu(menu);
+	    }
+//
+//	    @Override
+//	    public boolean onOptionsItemSelected(MenuItem item) {
+//	         // The action bar home/up action should open or close the drawer.
+//	         // ActionBarDrawerToggle will take care of this.
+//	        if (mDrawerToggle.onOptionsItemSelected(item)) {
+//	            return true;
+//	        }
+//	        // Handle action buttons
+//	        switch(item.getItemId()) {
+//	        case R.id.action_websearch:
+//	            // create intent to perform web search for this planet
+//	            Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+//	            intent.putExtra(SearchManager.QUERY, getActionBar().getTitle());
+//	            // catch event that there's no activity to handle intent
+//	            if (intent.resolveActivity(getPackageManager()) != null) {
+//	                startActivity(intent);
+//	            } else {
+//	                Toast.makeText(this, R.string.app_not_available, Toast.LENGTH_LONG).show();
+//	            }
+//	            return true;
+//	        default:
+//	            return super.onOptionsItemSelected(item);
+//	        }
+//	    }
 	    
 	    @Override
 	    public void selectItem(int position) {

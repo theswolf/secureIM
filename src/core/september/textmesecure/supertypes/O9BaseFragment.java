@@ -1,14 +1,15 @@
 package core.september.textmesecure.supertypes;
 
+import com.actionbarsherlock.app.SherlockListFragment;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ListFragment;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.services.O9IMService;
 
-public abstract class O9BaseFragment extends ListFragment{
+public abstract class O9BaseFragment extends SherlockListFragment {
 
 protected Handler handler;
 	

@@ -6,29 +6,32 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.StrictMode;
-import android.widget.Toast;
 
 import com.niusounds.asd.SQLiteDAO;
 import com.quickblox.core.QBCallback;
 import com.quickblox.core.result.Result;
+import com.quickblox.module.chat.QBChat;
 import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
 import com.quickblox.module.users.result.QBUserPagedResult;
+import com.quickblox.module.users.result.QBUserResult;
 
 import core.september.textmesecure.UsersListActivity;
 import core.september.textmesecure.algo.O9Message;
 import core.september.textmesecure.configs.Config;
+import core.september.textmesecure.fragments.UserListFragment;
 import core.september.textmesecure.interfaces.IAppManager;
 import core.september.textmesecure.sql.models.EnquedMessage;
 import core.september.textmesecure.sql.models.User;
@@ -45,6 +48,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	private final IBinder mBinder = new IMBinder();
 	private QBUser user;
 	private static O9ChatController _controller;
+	private Handler handler;
 
 	public class IMBinder extends Binder {
 		public IAppManager getService() {
@@ -136,34 +140,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	@Override
 	public void onCreate() 
 	{   	
-		//mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-
-		// Display a notification about us starting.  We put an icon in the status bar.
-		//   showNotification();
-		//conManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
-        List<User> list = dao.get(User.class);
-        
-        if(list != null && list.size() > 0) {
-        	User user = list.get(0);
-        	if(user.getPassword() != null && user.getPassword().trim().length() > 0) {
-        		try {
-        			setUpController(user.getUsername(), user.getPassword());
-        		}
-        		catch (Exception e){
-        			android.util.Log.d(TAG, e.getMessage(), e);
-        		}
-        		
-        	}
-        }
-
-		// Timer is used to take the friendList info every UPDATE_TIME_PERIOD;
-		//timer = new Timer();   
-
-		//
-		
-		
-		//registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+		setUpController();
 
 	}
 
@@ -262,17 +239,24 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            intent.putExtra(Config.MY_LOGIN, user.getLogin());
 	            intent.putExtra(Config.MY_PASSWORD, user.getPassword());
 	            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	            setUpController();
+	            //setUpController();
 	            storeUser(user.getLogin(), user.getPassword(), user.getEmail());
+	            setUpController();
 	            startActivity(intent);
-	            Toast.makeText(this, "You've been successfully logged in application",
-	                    Toast.LENGTH_SHORT).show();
+//	            Toast.makeText(this, "You've been successfully logged in application",
+//	                    Toast.LENGTH_SHORT).show();
 	        } else {
-	            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-	            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-	                    "please. Errors: " + result.getErrors()).create().show();
+	        	handleErrors(result);
 	        }
 		
+	}
+	
+	private void handleErrors(Result result) {
+		if(result.getErrors() != null && result.getErrors().size() > 0) {
+       	for(String error: result.getErrors()) {
+       		android.util.Log.d(TAG,error);
+       	}
+       }
 	}
 
 	@Override
@@ -305,9 +289,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 				}
 				
 				else {
-					 AlertDialog.Builder dialog = new AlertDialog.Builder(O9IMService.this);
-			            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-			                    "please. Errors: " + result.getErrors()).create().show();
+					handleErrors(result);
 				}
 				ret = true;
 				
@@ -327,14 +309,78 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		
 	}
 
-	@Override
-	public void setUpController(String user, String password) throws XMPPException {
-		if(_controller == null) {
-			_controller = new O9ChatController(user, password);
-			_controller.setOnMessageReceivedListener(onMessageReceivedListener);
-		}
-		
-	}
+//	@Override
+//	private void setUpController(String user, String password) throws XMPPException {
+//		if(_controller == null) {
+//			_controller = new O9ChatController(user, password);
+//			_controller.setOnMessageReceivedListener(onMessageReceivedListener);
+//		}
+//		
+//	}
+	
+
+
+	
+	private class LoginTask extends AsyncTask<User,Result,User> {
+		XMPPConnection connection = _controller.getConnection();
+		@Override
+	     protected User doInBackground(User... users) {
+	         try {
+	        	 connection.connect();
+	        	 
+	        				
+	         }
+	         
+	         catch (Exception e) {
+					// TODO Auto-generated catch block
+					android.util.Log.e(TAG,e.getMessage(),e);
+				}
+	         
+	         return users[0];
+	     }
+
+		@Override
+	     protected void onPostExecute(User user) {
+			
+			QBUsers.getUserByLogin(user.getUsername(), new QBCallback() {
+
+				@Override
+				public void onComplete(Result result, Object arg1) {
+					
+
+				}
+
+				@Override
+				public void onComplete(Result result) { 
+					 if (result != null && result.isSuccess()) {
+							QBUserResult userResult = (QBUserResult) result;
+							QBUser user = userResult.getUser();
+							String realLogin = QBChat.getChatLoginShort(user);
+							try {
+								try {
+									connection.disconnect();
+								}
+								catch (Throwable e) {
+									android.util.Log.d(TAG,e.getMessage(),e);
+								}
+								connection.login(realLogin, user.getPassword());
+								Intent intent = new Intent();
+					    		   intent.setAction(UserListFragment.class.getName());
+					    		   sendBroadcast(intent);
+								
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								android.util.Log.e(TAG,e.getMessage(),e);
+							}
+
+						}
+				}
+			});
+			
+	    	
+	     }
+
+	 }
 	
 	private void setUpController() {
 		if(_controller == null) {
@@ -342,17 +388,26 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	        List<User> list = dao.get(User.class);
 	        
 	        if(list != null && list.size() > 0) {
-	        	User user = list.get(0);
+	        	final User user = list.get(0);
 	        	if(user.getPassword() != null && user.getPassword().trim().length() > 0) {
 	        		try {
-	        			setUpController(user.getUsername(), user.getPassword());
+	        				_controller = new O9ChatController(user.getUsername(), user.getPassword());
+	        				_controller.setOnMessageReceivedListener(onMessageReceivedListener);
+	        				_controller.setUpConnection();
+	        				
+	        				
+//	        				
+	        				(new LoginTask()).execute(user);
 	        		}
+	        				
 	        		catch (Exception e){
 	        			android.util.Log.e(TAG, e.getMessage(), e);
 	        		}
 	        	}
 	        }
 		}
+		
+		
 		
 	}
 

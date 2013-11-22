@@ -6,19 +6,19 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.MessageTypeFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.util.StringUtils;
 
-import android.os.AsyncTask;
+import android.util.Log;
 
-import com.quickblox.core.QBCallback;
-import com.quickblox.core.result.Result;
 import com.quickblox.module.chat.QBChat;
-import com.quickblox.module.users.QBUsers;
-import com.quickblox.module.users.model.QBUser;
-import com.quickblox.module.users.result.QBUserPagedResult;
 
 /**
  * Date: 24.10.12
@@ -48,7 +48,7 @@ public class O9ChatController {
 
 	private XMPPConnection connection;
 
-	private ConnectionConfiguration config;
+	//private ConnectionConfiguration config;
 	private Chat chat;
 
 	private String chatLogin;
@@ -63,8 +63,8 @@ public class O9ChatController {
 			throws XMPPException {
 		this.chatLogin = chatLogin;
 		this.password = password;
-		Connection.DEBUG_ENABLED = true;
-		config = new ConnectionConfiguration(CHAT_SERVER);
+		//Connection.DEBUG_ENABLED = true;
+		//config = new ConnectionConfiguration(CHAT_SERVER);
 		//connection = new XMPPConnection(config);
 		//new ConnectionManager().execute();
 	}
@@ -73,9 +73,13 @@ public class O9ChatController {
 		return connection;
 	}
 	
-	public void setUpConnection() {
-		connection = new XMPPConnection(config);
+	public void setConnection(XMPPConnection connection) {
+		this.connection = connection;
 	}
+	
+//	public void setUpConnection() {
+//		connection = new XMPPConnection(config);
+//	}
 
 	public Roster getRoster() {
 		return connection.getRoster();
@@ -165,4 +169,6 @@ public class O9ChatController {
 			OnMessageReceivedListener onMessageReceivedListener) {
 		this.onMessageReceivedListener = onMessageReceivedListener;
 	}
+	
+	
 }

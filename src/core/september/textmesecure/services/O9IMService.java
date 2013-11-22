@@ -5,11 +5,18 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.MessageTypeFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.util.StringUtils;
 
 import android.app.Service;
 import android.content.Intent;
@@ -18,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.niusounds.asd.SQLiteDAO;
 import com.quickblox.core.QBCallback;
@@ -29,7 +37,6 @@ import com.quickblox.module.users.result.QBUserPagedResult;
 import com.quickblox.module.users.result.QBUserResult;
 
 import core.september.textmesecure.UsersListActivity;
-import core.september.textmesecure.algo.O9Message;
 import core.september.textmesecure.configs.Config;
 import core.september.textmesecure.fragments.UserListFragment;
 import core.september.textmesecure.interfaces.IAppManager;
@@ -320,6 +327,93 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 //		
 //	}
 	
+	protected void setConnection(XMPPConnection connection) {
+	    //this.connection = connection;
+		_controller.setConnection(connection);
+	    if (connection != null) {
+	      // Add a packet listener to get messages sent to us
+	      PacketFilter filter = new MessageTypeFilter(Message.Type.chat);
+	      connection.addPacketListener(new PacketListener() {
+	        @Override
+	        public void processPacket(Packet packet) {
+	          Message message = (Message) packet;
+	          if (message.getBody() != null) {
+	            String fromName = StringUtils.parseBareAddress(message.getFrom());
+	            Log.i("XMPPChatActivity ", " Text Recieved " + message.getBody() + " from " +  fromName);
+
+	            //messages.add(message.getBody());
+
+
+//	            mHandler.post(new Runnable() {
+//	              public void run() {
+//	                setListAdapter();
+//	              }
+//	            });
+	          }
+	        }
+
+
+	      }, filter);
+	    }
+	  }
+	
+	
+//	public void connect() {
+//
+//	    //final ProgressDialog dialog = ProgressDialog.show(this, "Connecting...", "Please wait...", false);
+////	    Thread t = new Thread(new Runnable() {
+////	      @Override
+////	      public void run() {
+//	        // Create a connection
+//	       ConnectionConfiguration connConfig = new ConnectionConfiguration(O9ChatController.CHAT_SERVER);
+//	       XMPPConnection connection = new XMPPConnection(connConfig);
+//	         try {
+//	           connection.connect();
+//	           Log.i("XMPPChatActivity",  "[SettingsDialog] Connected to "+connection.getHost());
+//	         } catch (XMPPException ex) {
+//	             Log.e("XMPPChatActivity",  "[SettingsDialog] Failed to connect to "+ connection.getHost());
+//	             Log.e("XMPPChatActivity", ex.toString());
+//	             setConnection(null);
+//	         }
+//	          try {
+//	            connection.login(USERNAME, PASSWORD);
+//	            Log.i("XMPPChatActivity",  "Logged in as" + connection.getUser());
+//
+//	            // Set the status to available
+//	            Presence presence = new Presence(Presence.Type.available);
+//	            connection.sendPacket(presence);
+//	            setConnection(connection);
+//
+//	            Roster roster = connection.getRoster();
+//	            Collection<RosterEntry> entries = roster.getEntries();
+//	            for (RosterEntry entry : entries) {
+//
+//	              Log.d("XMPPChatActivity",  "--------------------------------------");
+//	              Log.d("XMPPChatActivity", "RosterEntry " + entry);
+//	              Log.d("XMPPChatActivity", "User: " + entry.getUser());
+//	              Log.d("XMPPChatActivity", "Name: " + entry.getName());
+//	              Log.d("XMPPChatActivity", "Status: " + entry.getStatus());
+//	              Log.d("XMPPChatActivity", "Type: " + entry.getType());
+//	              Presence entryPresence = roster.getPresence(entry.getUser());
+//
+//	              Log.d("XMPPChatActivity", "Presence Status: "+ entryPresence.getStatus());
+//	              Log.d("XMPPChatActivity", "Presence Type: " + entryPresence.getType());
+//
+//	              Presence.Type type = entryPresence.getType();
+//	              if (type == Presence.Type.available)
+//	                Log.d("XMPPChatActivity", "Presence AVIALABLE");
+//	                Log.d("XMPPChatActivity", "Presence : " + entryPresence);
+//	              }
+//	              } catch (XMPPException ex) {
+//	                Log.e("XMPPChatActivity", "Failed to log in as "+  USERNAME);
+//	                Log.e("XMPPChatActivity", ex.toString());
+//	                setConnection(null);
+//	              }
+//	           }
+////	      });
+////	    t.start();
+////	    dialog.show();
+//	  }
 
 
 	
@@ -328,14 +422,18 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		@Override
 	     protected User doInBackground(User... users) {
 	         try {
+	        	 ConnectionConfiguration connConfig = new ConnectionConfiguration(O9ChatController.CHAT_SERVER);
+	  	       		XMPPConnection connection = new XMPPConnection(connConfig);
 	        	 connection.connect();
 	        	 
 	        				
 	         }
 	         
-	         catch (Exception e) {
-					// TODO Auto-generated catch block
-					android.util.Log.e(TAG,e.getMessage(),e);
+	         catch  (XMPPException ex) {
+	             Log.e("XMPPChatActivity",  "[SettingsDialog] Failed to connect to "+ connection.getHost());
+	             Log.e("XMPPChatActivity", ex.toString());
+	             O9IMService.this.setConnection(null);
+				 android.util.Log.e(TAG,ex.getMessage(),ex);
 				}
 	         
 	         return users[0];
@@ -358,31 +456,56 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 							QBUserResult userResult = (QBUserResult) result;
 							QBUser user = userResult.getUser();
 							String realLogin = QBChat.getChatLoginShort(user);
-							try {
 								try {
+									//connection.login(realLogin, user.getPassword());
 									connection.login(realLogin, user.getPassword());
+						            Log.i("XMPPChatActivity",  "Logged in as" + connection.getUser());
+
+						            // Set the status to available
+						            Presence presence = new Presence(Presence.Type.available);
+						            connection.sendPacket(presence);
+						            O9IMService.this.setConnection(connection);
+
+						            Roster roster = connection.getRoster();
+						            Collection<RosterEntry> entries = roster.getEntries();
+						            for (RosterEntry entry : entries) {
+
+						              Log.d("XMPPChatActivity",  "--------------------------------------");
+						              Log.d("XMPPChatActivity", "RosterEntry " + entry);
+						              Log.d("XMPPChatActivity", "User: " + entry.getUser());
+						              Log.d("XMPPChatActivity", "Name: " + entry.getName());
+						              Log.d("XMPPChatActivity", "Status: " + entry.getStatus());
+						              Log.d("XMPPChatActivity", "Type: " + entry.getType());
+						              Presence entryPresence = roster.getPresence(entry.getUser());
+
+						              Log.d("XMPPChatActivity", "Presence Status: "+ entryPresence.getStatus());
+						              Log.d("XMPPChatActivity", "Presence Type: " + entryPresence.getType());
+
+						              Presence.Type type = entryPresence.getType();
+						              if (type == Presence.Type.available)
+						                Log.d("XMPPChatActivity", "Presence AVIALABLE");
+						                Log.d("XMPPChatActivity", "Presence : " + entryPresence);
+						              }
 								}
-								catch (Throwable e) {
-									android.util.Log.d(TAG,e.getMessage(),e);
-								}
+						            catch (XMPPException ex) {
+						                Log.e("XMPPChatActivity", "Failed to log in as "+  realLogin);
+						                Log.e("XMPPChatActivity", ex.toString());
+						                setConnection(null);
+						              }
+								
+								
 								//connection.login(realLogin, user.getPassword());
 //								Intent intent = new Intent();
 //					    		   intent.setAction(UserListFragment.class.getName());
 //					    		   sendBroadcast(intent);
-								
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								android.util.Log.e(TAG,e.getMessage(),e);
-							}
 
-						}
-				}
-			});
 			
-	    	
-	     }
+					 }
+				}
+			}
 
 	 }
+	};
 	
 	private void setUpController() {
 		if(_controller == null) {

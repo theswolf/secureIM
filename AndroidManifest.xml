@@ -84,15 +84,19 @@
             </intent-filter>
         </activity>
         <activity android:name="core.september.textmesecure.SignUp"
+             	android:theme="@style/Theme.AppCompat.Light"
                   android:label="Sign Up">
         </activity>
         <activity android:name="core.september.textmesecure.SignIn"
+            	 android:theme="@style/Theme.AppCompat.Light"
                   android:label="Sign In">
         </activity>
          <activity android:name="core.september.textmesecure.UsersListActivity"
+             	 android:theme="@style/Theme.AppCompat.Light"
                   android:label="Friends">
         </activity>
          <activity android:name="core.september.textmesecure.ChatActivity"
+             	android:theme="@style/Theme.AppCompat.Light"
                   android:label="Chat">
         </activity>
          <service android:name="core.september.textmesecure.services.O9IMService" 

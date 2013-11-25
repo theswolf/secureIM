@@ -1,23 +1,21 @@
 package core.september.textmesecure;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ComponentName;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
-import core.september.textmesecure.interfaces.IAppManager;
-import core.september.textmesecure.services.O9IMService;
+import core.september.textmesecure.configs.Config;
+import core.september.textmesecure.fragments.UserListFragment;
 import core.september.textmesecure.supertypes.O9BaseActivity;
 
 public class SignIn extends O9BaseActivity {
@@ -45,6 +43,37 @@ public class SignIn extends O9BaseActivity {
 	public void onBackPressed() {
 		Intent intent = new Intent(this, SignUp.class);
         startActivity(intent);
+	}
+	
+	public BroadcastReceiver loggedInReceiver = new BroadcastReceiver() {
+		
+		@Override
+		public void onReceive(Context context, Intent intent) {
+        	try {
+	            
+        		Intent intentTo = new Intent(SignIn.this, UsersListActivity.class);
+				Bundle extras = intent.getExtras();
+				intentTo.putExtras(extras);
+				startActivity(intentTo);
+	            
+	        } catch (Exception e) {
+	        	 android.util.Log.e(TAG,e.getMessage(),e);
+	        }
+		}
+	};
+	
+	@Override
+	public void onResume() {
+		//super.onResume();
+		LocalBroadcastManager.getInstance(this).registerReceiver(loggedInReceiver,new IntentFilter(Config.LOGIN_SUCCESS));
+		super.onResume();
+	}
+	
+	@Override
+	public void onPause() 
+	{ 
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(loggedInReceiver);
+		super.onPause();
 	}
 
 	public void onCreate(Bundle savedInstanceState) {

@@ -3,9 +3,9 @@ package core.september.textmesecure;
 
 
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+
+
+import com.quickblox.module.users.model.QBUser;
 
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -13,11 +13,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import core.september.textmesecure.configs.Config;
+import core.september.textmesecure.services.O9IMService;
 import core.september.textmesecure.supertypes.FragmentFactory;
 import core.september.textmesecure.supertypes.O9BaseFragmentActivity;
 
@@ -37,6 +40,9 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	        setContentView(R.layout.activity_users_list);
 	        bundle = savedInstanceState == null ? new Bundle() : savedInstanceState;
 	       
+	        //QBUser user = new QBUser(getIntent().getExtras().getString(Config.MY_LOGIN), getIntent().getExtras().getString(Config.MY_PASSWORD));
+	       
+	        
 	        mTitle = mDrawerTitle = getTitle();
 	        mMenuTitles = getResources().getStringArray(R.array.lis_activity_menu);
 	        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -63,13 +69,13 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	                R.string.drawer_close  /* "close drawer" description for accessibility */
 	                ) {
 	            public void onDrawerClosed(View view) {
-	                getSupportActionBar().setTitle(mTitle);
-	                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+	            	getSupportActionBar().setTitle(mTitle);
+	                supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 	            }
 
 	            public void onDrawerOpened(View drawerView) {
-	            	 getSupportActionBar().setTitle(mTitle);
-	                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+	            	getSupportActionBar().setTitle(mTitle);
+	            	supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 	            }
 	        };
 	        mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -111,14 +117,15 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 	        return super.onPrepareOptionsMenu(menu);
 	    }
 //
-//	    @Override
-//	    public boolean onOptionsItemSelected(MenuItem item) {
-//	         // The action bar home/up action should open or close the drawer.
-//	         // ActionBarDrawerToggle will take care of this.
-//	        if (mDrawerToggle.onOptionsItemSelected(item)) {
-//	            return true;
-//	        }
-//	        // Handle action buttons
+	    @Override
+	    public boolean onOptionsItemSelected(MenuItem item) {
+	         // The action bar home/up action should open or close the drawer.
+	         // ActionBarDrawerToggle will take care of this.
+	        if (mDrawerToggle.onOptionsItemSelected(item)) {
+	            return true;
+	        }
+	        else  return super.onOptionsItemSelected(item);
+	        // Handle action buttons
 //	        switch(item.getItemId()) {
 //	        case R.id.action_websearch:
 //	            // create intent to perform web search for this planet
@@ -134,7 +141,7 @@ public class UsersListActivity extends O9BaseFragmentActivity{
 //	        default:
 //	            return super.onOptionsItemSelected(item);
 //	        }
-//	    }
+	    }
 	    
 	    @Override
 	    public void selectItem(int position) {

@@ -9,6 +9,7 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
@@ -37,14 +38,14 @@ import com.quickblox.module.users.result.QBUserPagedResult;
 import com.quickblox.module.users.result.QBUserResult;
 
 import core.september.textmesecure.UsersListActivity;
+import core.september.textmesecure.algo.O9Message;
 import core.september.textmesecure.configs.Config;
-import core.september.textmesecure.fragments.UserListFragment;
-import core.september.textmesecure.interfaces.IAppManager;
+import core.september.textmesecure.interfaces.ServiceCallback;
 import core.september.textmesecure.sql.models.EnquedMessage;
 import core.september.textmesecure.sql.models.User;
 import core.september.textmesecure.sql.models.User.SubscriptionType;
 
-public class O9IMService extends Service implements IAppManager, QBCallback {
+public class O9IMService extends Service implements QBCallback {
 	//	private NotificationManager mNM;
 
 	public static final String TAG = O9IMService.class.getName();
@@ -53,12 +54,14 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	public ConnectivityManager conManager = null; 
 	private boolean ret = false;
 	private final IBinder mBinder = new IMBinder();
-	private QBUser user;
+	private static QBUser user;
 	private static O9ChatController _controller;
 	private Handler handler;
+	private LinkedList<QBUser> rosterEntries;
+	private Presence presence;
 
 	public class IMBinder extends Binder {
-		public IAppManager getService() {
+		public O9IMService getService() {
 			return O9IMService.this;
 		}
 
@@ -68,35 +71,27 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		SENT,
 		RECEIVED
 	}
-
-//	private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
-//		@Override
-//		public void onReceive(Context context, Intent intent) {
-//			boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-//			String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
-//			boolean isFailover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
-//			NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-//			NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
-//
-//			if(runner != null) {
-//				try {
-//					runner.join(1000);
-//					socketOperator.stopListening();
-//					runThread();
-//					SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
-//					User me = dao.get(User.class).get(0);
-//					signUpUser(me.getUsername(), me.getPassword(), me.getEmail());
-//				}
-//				catch(Throwable t) {
-//					android.util.Log.d(TAG, "Errors on changing connection events", t);
-//				}
-//				
-//			}
-//		}
-//	}; 
+	
+	
 
 	
-	 private O9ChatController.OnMessageReceivedListener onMessageReceivedListener = new O9ChatController.OnMessageReceivedListener() {
+	 public Presence getPresence() {
+		return presence;
+	}
+	public void setPresence(Presence presence) {
+		this.presence = presence;
+	}
+	public LinkedList<QBUser> getRosterEntries() {
+		 if(rosterEntries == null) {
+			 setRosterEntries(new LinkedList<QBUser>());
+		 }
+		return rosterEntries;
+	}
+	public void setRosterEntries(LinkedList<QBUser> rosterEntries) {
+		this.rosterEntries = rosterEntries;
+	}
+
+	private O9ChatController.OnMessageReceivedListener onMessageReceivedListener = new O9ChatController.OnMessageReceivedListener() {
 	        @Override
 	        public void onMessageReceived(final Message message) {
 	            String messageString = message.getBody();
@@ -106,13 +101,20 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            switch (type) {
 				case KEY_EXCHANGE:
 					String myNewKey = O9KeyController.getInstance(O9IMService.this).generatePublicKey(message.getFrom(), friendKey);
-					String processedMessageString = O9KeyController.getInstance(O9IMService.this).processAcceptMessage(o9message,myNewKey);
-					getController().sendMessage(processedMessageString);
+					final String processedMessageString = O9KeyController.getInstance(O9IMService.this).processAcceptMessage(o9message,myNewKey);
+					getController(new ServiceCallback() {
+						
+						@Override
+						public void onComplete() {
+							_controller.sendMessage(processedMessageString);
+							
+						}
+					});
 					break;
 				case KEY_ACCEPT:
 					String myKey = o9message.getReceiverPublicKey();
 					O9KeyController.getInstance(O9IMService.this).updateKeyPair(myKey,friendKey,message.getFrom());
-					for(EnquedMessage enquedMessage: getEnquedMessage(getController().getActualFriendLogin())) {
+					for(EnquedMessage enquedMessage: getEnquedMessage(_controller.getActualFriendLogin())) {
 						deleteEnquedMessage(enquedMessage);
 						sendMessage(enquedMessage.getMessage());
 					}
@@ -138,16 +140,19 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	       }
 	    };
 	
-	private O9ChatController getController() {
+	private void getController(ServiceCallback callback) {
 	    	if(_controller == null) {
-	    		setUpController();
+	    		setUpController(callback);
 	    	}
-	    	return _controller;
+	    	else {
+	    		if(callback!= null)
+	    		callback.onComplete();
+	    	}
 	    }
 	@Override
 	public void onCreate() 
 	{   	
-		setUpController();
+		setUpController(null);
 
 	}
 
@@ -165,7 +170,7 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	@Override
 	public IBinder onBind(Intent intent) 
 	{
-		setUpController();
+		setUpController(null);
 		return mBinder;
 	}
 	
@@ -218,6 +223,12 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		dao.delete(User.class, "_id=?", "0");
 		dao.insert(new User(0, usernameText, passwordText, emailText, SubscriptionType.BASIC));
 	}
+	
+	private User getUser() {
+		SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, User.class);
+		List<User> userList = dao.get(User.class);
+		return userList != null && userList.size() > 0 ? userList.get(0) : null;
+	}
 
 	public void signUpUser(String usernameText, String passwordText,String emailText) 
 	{
@@ -248,10 +259,10 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	            //setUpController();
 	            storeUser(user.getLogin(), user.getPassword(), user.getEmail());
-	            setUpController();
-	            startActivity(intent);
+	            //setUpController();
+	            //startActivity(intent);
 	            Intent intent2 = new Intent();
-	    		   intent2.setAction(UserListFragment.class.getName());
+	    		   intent2.setAction(Config.LOGIN_SUCCESS);
 	    		   sendBroadcast(intent2);
 
 	        } else {
@@ -274,46 +285,51 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		
 	}
 	
-
-	@Override
-	public List<QBUser> getFriendList() {
+	
+	//@Override
+	public void getFriendList() {
 		
 		final ArrayList<QBUser> listresult = new ArrayList<QBUser>();
 		//SQLiteDAO dao = SQLiteDAO.getInstance(O9IMService.this, FriendId.class);
 		//List<FriendId> friendsids = dao.get(FriendId.class);
-		LinkedList<String> list = new LinkedList<String>();
-		Collection<RosterEntry> rosterEntries = getController().getRoster().getEntries();
-		for(RosterEntry entry: rosterEntries) {
-			list.add(entry.getUser());
-		}
-		QBUsers.getUsersByIDs(list, new QBCallback() {
+		
+		 getController(new ServiceCallback() {
 			
 			@Override
-			public void onComplete(Result result) {
-				
-				if(result.isSuccess()) {
-					QBUserPagedResult pagedResult = (QBUserPagedResult) result;
-					listresult.addAll(pagedResult.getUsers());
+			public void onComplete() {
+				Collection<RosterEntry> rosterEntries = _controller.getRoster().getEntries();
+				LinkedList<String> list = new LinkedList<String>();
+				for(RosterEntry entry: rosterEntries) {
+					list.add(entry.getUser());
+				}
+				QBUsers.getUsersByIDs(list, new QBCallback() {
 					
-				}
-				
-				else {
-					handleErrors(result);
-				}
-				ret = true;
-				
-			}
-			
-			@Override
-			public void onComplete(Result result, Object arg1) {
-				// TODO Auto-generated method stub
-				
+					@Override
+					public void onComplete(Result result) {
+						
+						if(result.isSuccess()) {
+							QBUserPagedResult pagedResult = (QBUserPagedResult) result;
+							getRosterEntries().addAll(pagedResult.getUsers());
+							Intent intent = new Intent();
+				    		   intent.setAction(Config.USER_RETRIVED);
+				    		   sendBroadcast(intent);
+							
+						}
+						
+						else {
+							handleErrors(result);
+						}
+						
+					}
+					
+					@Override
+					public void onComplete(Result result, Object arg1) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
 			}
 		});
-		
-		while (!ret) {}
-		ret = false;
-		return listresult;
 		
 		
 	}
@@ -415,22 +431,31 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 ////	    dialog.show();
 //	  }
 
-
+	private QBUser getLoggedUser() {
+		return user;
+	}
 	
 	private class LoginTask extends AsyncTask<User,Result,User> {
-		XMPPConnection connection = _controller.getConnection();
+		public LoginTask(ServiceCallback callback) {
+			super();
+			this.callback = callback;
+		}
+		ServiceCallback callback;
+		//XMPPConnection connection = _controller.getConnection();
+		 ConnectionConfiguration connConfig = new ConnectionConfiguration(O9ChatController.CHAT_SERVER);
+      	XMPPConnection connection = new XMPPConnection(connConfig);
 		@Override
 	     protected User doInBackground(User... users) {
 	         try {
-	        	 ConnectionConfiguration connConfig = new ConnectionConfiguration(O9ChatController.CHAT_SERVER);
-	  	       		XMPPConnection connection = new XMPPConnection(connConfig);
-	        	 connection.connect();
+	        	 	SASLAuthentication.supportSASLMechanism("PLAIN", 0);
+	  	       		connection.connect();
+	  	       		//_controller.setConnection(connection);
 	        	 
 	        				
 	         }
 	         
 	         catch  (XMPPException ex) {
-	             Log.e("XMPPChatActivity",  "[SettingsDialog] Failed to connect to "+ connection.getHost());
+	             Log.e("XMPPChatActivity",  "[SettingsDialog] Failed to connect to "+ _controller.getConnection().getHost());
 	             Log.e("XMPPChatActivity", ex.toString());
 	             O9IMService.this.setConnection(null);
 				 android.util.Log.e(TAG,ex.getMessage(),ex);
@@ -445,69 +470,71 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 			QBUsers.getUserByLogin(user.getUsername(), new QBCallback() {
 
 				@Override
-				public void onComplete(Result result, Object arg1) {
-					
+				public void onComplete(Result result) {
+					 if (result != null && result.isSuccess()) { 
+						 //XMPPConnection connection = _controller.getConnection();
+						 QBUserResult userResult = (QBUserResult) result;
+							QBUser resuser = userResult.getUser();
+							User me = getUser();
+							String realLogin = QBChat.getChatLoginShort(resuser);
+							try {
+								//connection.login(realLogin, user.getPassword());
+								connection.login(realLogin, me.getPassword());
+					            Log.i("XMPPChatActivity",  "Logged in as" + connection.getUser());
 
+					            // Set the status to available
+					            Presence presence = new Presence(Presence.Type.available);
+					            connection.sendPacket(presence);
+					            O9IMService.this.setConnection(connection);
+
+					            Roster roster = connection.getRoster();
+					            Collection<RosterEntry> entries = roster.getEntries();
+					            for (RosterEntry entry : entries) {
+
+					              Log.d("XMPPChatActivity",  "--------------------------------------");
+					              Log.d("XMPPChatActivity", "RosterEntry " + entry);
+					              Log.d("XMPPChatActivity", "User: " + entry.getUser());
+					              Log.d("XMPPChatActivity", "Name: " + entry.getName());
+					              Log.d("XMPPChatActivity", "Status: " + entry.getStatus());
+					              Log.d("XMPPChatActivity", "Type: " + entry.getType());
+					              Presence entryPresence = roster.getPresence(entry.getUser());
+
+					              Log.d("XMPPChatActivity", "Presence Status: "+ entryPresence.getStatus());
+					              Log.d("XMPPChatActivity", "Presence Type: " + entryPresence.getType());
+
+					              Presence.Type type = entryPresence.getType();
+					              if (type == Presence.Type.available)
+					                Log.d("XMPPChatActivity", "Presence AVIALABLE");
+					                Log.d("XMPPChatActivity", "Presence : " + entryPresence);
+					              }
+							}
+					            catch (XMPPException ex) {
+					            	_controller = null;
+					                Log.e("XMPPChatActivity", "Failed to log in as "+  realLogin);
+					                Log.e("XMPPChatActivity", ex.toString());
+					                setConnection(null);
+					              }
+					 }
+					
 				}
 
 				@Override
-				public void onComplete(Result result) { 
-					 if (result != null && result.isSuccess()) {
-							QBUserResult userResult = (QBUserResult) result;
-							QBUser user = userResult.getUser();
-							String realLogin = QBChat.getChatLoginShort(user);
-								try {
-									//connection.login(realLogin, user.getPassword());
-									connection.login(realLogin, user.getPassword());
-						            Log.i("XMPPChatActivity",  "Logged in as" + connection.getUser());
-
-						            // Set the status to available
-						            Presence presence = new Presence(Presence.Type.available);
-						            connection.sendPacket(presence);
-						            O9IMService.this.setConnection(connection);
-
-						            Roster roster = connection.getRoster();
-						            Collection<RosterEntry> entries = roster.getEntries();
-						            for (RosterEntry entry : entries) {
-
-						              Log.d("XMPPChatActivity",  "--------------------------------------");
-						              Log.d("XMPPChatActivity", "RosterEntry " + entry);
-						              Log.d("XMPPChatActivity", "User: " + entry.getUser());
-						              Log.d("XMPPChatActivity", "Name: " + entry.getName());
-						              Log.d("XMPPChatActivity", "Status: " + entry.getStatus());
-						              Log.d("XMPPChatActivity", "Type: " + entry.getType());
-						              Presence entryPresence = roster.getPresence(entry.getUser());
-
-						              Log.d("XMPPChatActivity", "Presence Status: "+ entryPresence.getStatus());
-						              Log.d("XMPPChatActivity", "Presence Type: " + entryPresence.getType());
-
-						              Presence.Type type = entryPresence.getType();
-						              if (type == Presence.Type.available)
-						                Log.d("XMPPChatActivity", "Presence AVIALABLE");
-						                Log.d("XMPPChatActivity", "Presence : " + entryPresence);
-						              }
-								}
-						            catch (XMPPException ex) {
-						                Log.e("XMPPChatActivity", "Failed to log in as "+  realLogin);
-						                Log.e("XMPPChatActivity", ex.toString());
-						                setConnection(null);
-						              }
-								
-								
-								//connection.login(realLogin, user.getPassword());
-//								Intent intent = new Intent();
-//					    		   intent.setAction(UserListFragment.class.getName());
-//					    		   sendBroadcast(intent);
-
+				public void onComplete(Result arg0, Object arg1) {
+					if(callback!= null) {
+						callback.onComplete();
+					}
+					
+				} 
+				
+			});
 			
-					 }
-				}
-			}
+		}
+		
+	}
 
-	 }
-	};
+
 	
-	private void setUpController() {
+	private void setUpController(ServiceCallback callback) {
 		if(_controller == null) {
 			SQLiteDAO dao = SQLiteDAO.getInstance(this, User.class);
 	        List<User> list = dao.get(User.class);
@@ -518,11 +545,11 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	        		try {
 	        				_controller = new O9ChatController(user.getUsername(), user.getPassword());
 	        				_controller.setOnMessageReceivedListener(onMessageReceivedListener);
-	        				_controller.setUpConnection();
+	        				//_controller.setUpConnection();
 	        				
 	        				
 //	        				
-	        				(new LoginTask()).execute(user);
+	        				(new LoginTask(callback)).execute(user);
 	        		}
 	        				
 	        		catch (Exception e){
@@ -532,29 +559,40 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 	        }
 		}
 		
+		else if(callback!= null) {
+			callback.onComplete();
+		}
+		
 		
 		
 	}
 
-	@Override
-	public void startChat(String friendLogin) {
-		getController().startChat(friendLogin);
+	//@Override
+	public void startChat(final String friendLogin) {
+		getController(new ServiceCallback() {
+			
+			@Override
+			public void onComplete() {
+				_controller.startChat(friendLogin);
+				
+			}
+		});
 	}
 
-	@Override
+	//@Override
 	public void sendMessage(String messageString) {
-		String friendKey = getFriendKeyFromLocalDB(getController().getActualFriendLogin());
+		String friendKey = getFriendKeyFromLocalDB(_controller.getActualFriendLogin());
 		if(friendKey != null) {
-			String processedMessageString = O9KeyController.getInstance(this).processTextMessage(messageString,getController().getActualFriendLogin());
-			getController().sendMessage(processedMessageString);
-			O9KeyController.getInstance(this).decreaseTTL(getController().getActualFriendLogin());
+			String processedMessageString = O9KeyController.getInstance(this).processTextMessage(messageString,_controller.getActualFriendLogin());
+			_controller.sendMessage(processedMessageString);
+			O9KeyController.getInstance(this).decreaseTTL(_controller.getActualFriendLogin());
 		}
 		
 		else {
-			enqueMessage(messageString, getController().getActualFriendLogin());
-			String newPublicKeyRepo = O9KeyController.getInstance(this).generatePublicKey(getController().getActualFriendLogin(),null);
+			enqueMessage(messageString, _controller.getActualFriendLogin());
+			String newPublicKeyRepo = O9KeyController.getInstance(this).generatePublicKey(_controller.getActualFriendLogin(),null);
 			String processedMessageString = O9KeyController.getInstance(this).processExchangeMessage(newPublicKeyRepo);
-			getController().sendMessage(processedMessageString);
+			_controller.sendMessage(processedMessageString);
 		}
 		
 		
@@ -581,18 +619,40 @@ public class O9IMService extends Service implements IAppManager, QBCallback {
 		enqueer.delete(EnquedMessage.class, "_id=", message.get_id());
 	}
 
-	@Override
-	public Presence getPresence(String user) {
-		return getController().getRoster().getPresence(user);
+	//@Override
+	public void getPresence(final String user) {
+		getController(new ServiceCallback() {
+			
+			@Override
+			public void onComplete() {
+				setPresence(_controller.getRoster().getPresence(user));
+				Intent intent = new Intent();
+	    		   intent.setAction(Config.PRESENCE_RETRIVED);
+	    		   sendBroadcast(intent);
+				
+			}
+		});
 	}
 
-	@Override
-	public void addFriend(String login) throws XMPPException {
-		getController().getRoster().createEntry(login, login, new String[]{"friends"});
+	//@Override
+	public void addFriend(final String login) throws XMPPException {
+		
+		getController(new ServiceCallback() {
+			
+			@Override
+			public void onComplete() {
+				try {
+					_controller.getRoster().createEntry(login, login, new String[]{"friends"});
+				} catch (XMPPException e) {
+					// TODO Auto-generated catch block
+					android.util.Log.e(TAG,e.getMessage(),e);
+				}
+				
+			}
+		});
 		
 	}
 	
-
 
 	
    

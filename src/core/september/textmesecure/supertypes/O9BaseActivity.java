@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 public abstract class O9BaseActivity  extends Activity{
 	
-protected IAppManager imService;
+protected O9IMService imService;
 	
 protected ServiceConnection mConnection= new ServiceConnection() {
 	

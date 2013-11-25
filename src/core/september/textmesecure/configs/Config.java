@@ -15,4 +15,7 @@ public class Config {
 	public static final String _CHAT_LOGIN = "CHAT_LOGIN";
 	public static final String USER_STATUS = "USER_STATUS";
 	public static final String USER_LIST_MENU = "USER_LIEST_MENU";
+	public static final String LOGIN_SUCCESS = "LOGIN_SUCCESS";
+	public static final String USER_RETRIVED = "USER_RETRIVED";
+	public static final String PRESENCE_RETRIVED = "PRESENCE_RETRIVED";
 }

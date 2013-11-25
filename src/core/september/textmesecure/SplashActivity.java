@@ -105,7 +105,8 @@ public class SplashActivity extends O9BaseActivity  implements QBCallback {
 			 intent.putExtra(Config.MY_ID, user.get_id());
 			 intent.putExtra(Config.MY_LOGIN, user.getUsername());
 			 intent.putExtra(Config.MY_PASSWORD, user.getPassword());
-	         imService.signInUser(user.getUsername(), user.getPassword());
+			 startActivity(intent);
+	         //imService.signInUser(user.getUsername(), user.getPassword());
 			break;
 		case NEED_SIGNIN:
 			intent = new Intent(this, SignIn.class);

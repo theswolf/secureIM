@@ -1,0 +1,87 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0.0" package="core.september.textmesecure">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <uses-sdk android:maxSdkVersion="22" android:minSdkVersion="8" android:targetSdkVersion="22"/>
+
+    <application>
+<!--         <activity android:name="core.september.textmesecure.FriendList" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.NORMAL" >
+                </category>
+            </intent-filter>
+        </activity>
+
+        <service android:name="core.september.textmesecure.services.IMService" >
+        </service>
+
+        <activity android:name="core.september.textmesecure.Login" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.LAUNCHER" >
+                </category>
+            </intent-filter>
+        </activity>
+        <activity android:name="core.september.textmesecure.Messaging" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.NORMAL" >
+                </category>
+            </intent-filter>
+        </activity>
+        <activity android:name="core.september.textmesecure.SignUp" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.NORMAL" >
+                </category>
+            </intent-filter>
+        </activity>
+        <activity android:name="core.september.textmesecure.AddFriend" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.NORMAL" >
+                </category>
+            </intent-filter>
+        </activity>
+        <activity android:name="core.september.textmesecure.UnApprovedFriendList" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.NORMAL" >
+                </category>
+            </intent-filter>
+        </activity> -->
+        
+        <activity android:configChanges="orientation|keyboardHidden|screenSize" android:label="@string/title_activity_splash" android:name="core.september.textmesecure.SplashActivity" android:theme="@style/FullscreenTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:label="Sign Up" android:name="core.september.textmesecure.SignUp" android:theme="@style/Theme.AppCompat.Light">
+        </activity>
+        <activity android:label="Sign In" android:name="core.september.textmesecure.SignIn" android:theme="@style/Theme.AppCompat.Light">
+        </activity>
+         <activity android:label="Friends" android:name="core.september.textmesecure.UsersListActivity" android:theme="@style/Theme.AppCompat.Light">
+        </activity>
+         <activity android:label="Chat" android:name="core.september.textmesecure.ChatActivity" android:theme="@style/Theme.AppCompat.Light">
+        </activity>
+         <service android:enabled="true" android:name="core.september.textmesecure.services.O9IMService">
+        </service>
+    </application>
+
+</manifest>

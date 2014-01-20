@@ -94,14 +94,14 @@ public class AddUserFragment extends O9BaseFragment implements QBCallback{
 					public void onClick(View v) {
 						for(CheckBoxModel model: modelList) {
 							if(model.isSelected()) {
-								try {
-									getService().addFriend(model.getLogin());
-								} catch (XMPPException e) {
-									// TODO Auto-generated catch block
-									AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
-						            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
-						                    "please. Errors: " + e.getMessage()).create().show();
-								}
+//								try {
+//									getService().addFriend(model.getLogin());
+//								} catch (XMPPException e) {
+//									// TODO Auto-generated catch block
+//									AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+//						            dialog.setMessage("Error(s) occurred. Look into DDMS log for details, " +
+//						                    "please. Errors: " + e.getMessage()).create().show();
+//								}
 							}
 						}
 						

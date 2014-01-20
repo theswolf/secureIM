@@ -9,7 +9,7 @@ public class FragmentFactory {
 		Fragment fragmet = null;
 		switch (position) {
 		case 0:
-			fragmet = new UserListFragment();
+			//fragmet = new UserListFragment();
 			break;
 
 		default:

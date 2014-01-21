@@ -29,7 +29,8 @@ public class SplashActivity extends O9BaseActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) { 
+    protected void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
     	while(imService == null) {}
     	Route route = imService.getRoute();
     	Toast.makeText(this, "Route is "+route, 300).show();

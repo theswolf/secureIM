@@ -33,6 +33,7 @@ import core.september.textmesecure.configs.Messages;
 import core.september.textmesecure.configs.Route;
 import core.september.textmesecure.helpers.DBHelper;
 import core.september.textmesecure.interfaces.O9LooperService;
+import core.september.textmesecure.interfaces.OnComplete;
 import core.september.textmesecure.sql.models.User;
 
 public class O9IMService extends Service implements O9LooperService{
@@ -53,7 +54,24 @@ public class O9IMService extends Service implements O9LooperService{
 
 	}
 	
-	
+	private QBCallback callback = new QBCallback() {
+		
+		@Override
+		public void onComplete(Result result, Object arg1) {
+			if (result.isSuccess()) { 
+				signedIn = true;
+				postMessage(Messages.QBUSERSIGNED);
+			}
+			//sessionCreated = result.isSuccess();
+			
+		}
+		
+		@Override
+		public void onComplete(Result result) {
+			onComplete(result,null);
+			
+		}
+	};
 	
 	private void postMessage(int message) {
 		android.os.Message msg = new android.os.Message();
@@ -137,24 +155,7 @@ public class O9IMService extends Service implements O9LooperService{
 		//storeUser(usernameText, passwordText, emailText);
 		
 		qbUser = new QBUser(usernameText, passwordText, emailText);
-		QBUsers.signUpSignInTask(qbUser, new QBCallback() {
-			
-			@Override
-			public void onComplete(Result result, Object arg1) {
-				if (result.isSuccess()) { 
-					signedIn = true;
-					postMessage(Messages.QBUSERSIGNED);
-				}
-				//sessionCreated = result.isSuccess();
-				
-			}
-			
-			@Override
-			public void onComplete(Result result) {
-				onComplete(result,null);
-				
-			}
-		});
+		QBUsers.signUpSignInTask(qbUser, callback);
 		
 	}
 	
@@ -164,28 +165,21 @@ public class O9IMService extends Service implements O9LooperService{
 		//storeUser(usernameText, passwordText, null);
 		
 		qbUser = new QBUser(usernameText, passwordText);
-		QBUsers.signIn(qbUser, new QBCallback() {
-			
-			@Override
-			public void onComplete(Result result, Object arg1) {
-				if (result.isSuccess()) { 
-					signedIn = true;
-					postMessage(Messages.QBUSERSIGNED);
-				}
-				//sessionCreated = result.isSuccess();
-				
-			}
-			
-			@Override
-			public void onComplete(Result result) {
-				onComplete(result,null);
-				
-			}
-		});
+		QBUsers.signIn(qbUser, callback);
 	}
 	
-	
 	public void connect() {
+		if(connection == null) {
+			_connect(new OnComplete() {
+				
+				@Override
+				public void complete() {
+					sendBroadcast(new Intent(Messages.CONNECTION_DONE));					
+				}
+			});
+		}
+	}
+	private void _connect(final OnComplete onComplete) {
 
 	    //final ProgressDialog dialog = ProgressDialog.show(this, "Connecting...", "Please wait...", false);
 	    Thread t = new Thread(new Runnable() {
@@ -231,6 +225,7 @@ public class O9IMService extends Service implements O9LooperService{
 	              if (type == Presence.Type.available)
 	                Log.d("XMPPChatDemoActivity", "Presence AVIALABLE");
 	                Log.d("XMPPChatDemoActivity", "Presence : " + entryPresence);
+	                
 	              }
 	              } catch (XMPPException ex) {
 	                Log.e("XMPPChatDemoActivity", "Failed to log in as "+  qbUser.getLogin());
@@ -238,7 +233,11 @@ public class O9IMService extends Service implements O9LooperService{
 	                setConnection(null);
 	              }
 	              //dialog.dismiss();
-	           }
+	           
+	          if(onComplete != null) {
+	        	  onComplete.complete();
+	          }
+	      	}
 	      });
 	    t.start();
 	    //dialog.show();

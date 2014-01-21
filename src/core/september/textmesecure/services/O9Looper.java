@@ -1,7 +1,6 @@
 package core.september.textmesecure.services;
 
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -14,9 +13,12 @@ import com.quickblox.module.auth.QBAuth;
 
 import core.september.textmesecure.configs.Messages;
 import core.september.textmesecure.interfaces.O9LooperService;
+import core.september.textmesecure.interfaces.OnComplete;
 import core.september.textmesecure.sql.models.User;
 
 public class O9Looper extends Thread{
+	
+	
 
 	private boolean isReady = false;
 	private Handler mHandler = null;
@@ -40,17 +42,25 @@ public class O9Looper extends Thread{
 			public void  handleMessage(Message msg) {
 				int mType = msg.what;
 				switch (mType) {
+				
 				case Messages.READY:
 					long currentTime = System.currentTimeMillis();
-					createSession();
-					while(!sessionCreated && System.currentTimeMillis() < (TimeUnit.SECONDS.toMillis(15)+currentTime)) {};
-					if(sessionCreated) {
-						User user = looperService.getUser();
-						looperService.signInUser(user.getUsername(), user.getEmail());
-					}
+					createSession(new OnComplete() {
+						
+						@Override
+						public void complete() {
+							User user = looperService.getUser();
+							looperService.signInUser(user.getUsername(), user.getEmail());
+							
+						}
+					});
+
 					
 					break;
 
+				case Messages.QBUSERSIGNED:
+					looperService.connect();
+					break;
 				default:
 					break;
 				}
@@ -73,7 +83,7 @@ public class O9Looper extends Thread{
 	
 	
 	
-	private void createSession() {
+	private void createSession(final OnComplete complete) {
 		QBSettings.getInstance().fastConfigInit("4696", "OYQ2G3syJAYCbpD", "nevsq5jds-eyS7n");
         QBAuth.createSession(new QBCallback() {
 			
@@ -84,6 +94,9 @@ public class O9Looper extends Thread{
 					looperService.signInUser(user.getUsername(), user.getEmail());
 				}
 				sessionCreated = result.isSuccess();
+				if(complete != null) {
+					complete.complete();
+				}
 				
 			}
 			

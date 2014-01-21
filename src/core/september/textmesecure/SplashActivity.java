@@ -32,7 +32,8 @@ public class SplashActivity extends O9BaseActivity {
     protected void onCreate(Bundle savedInstanceState) { 
     	while(imService == null) {}
     	Route route = imService.getRoute();
-    	Toast.makeText(this, "Route is "+route, 300);
+    	Toast.makeText(this, "Route is "+route, 300).show();
+    	
     	
     }
 

@@ -79,9 +79,10 @@ public class O9Looper extends Thread{
 			
 			@Override
 			public void onComplete(Result result, Object arg1) {
-//				if (result.isSuccess()) { 
-//					
-//				}
+				if (result.isSuccess()) { 
+					User user = looperService.getUser();
+					looperService.signInUser(user.getUsername(), user.getEmail());
+				}
 				sessionCreated = result.isSuccess();
 				
 			}

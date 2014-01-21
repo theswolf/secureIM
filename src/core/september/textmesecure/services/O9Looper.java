@@ -43,7 +43,7 @@ public class O9Looper extends Thread{
 				case Messages.READY:
 					long currentTime = System.currentTimeMillis();
 					createSession();
-					while(!sessionCreated && currentTime < TimeUnit.SECONDS.toMillis(15)+currentTime) {};
+					while(!sessionCreated && System.currentTimeMillis() < (TimeUnit.SECONDS.toMillis(15)+currentTime)) {};
 					if(sessionCreated) {
 						User user = looperService.getUser();
 						looperService.signInUser(user.getUsername(), user.getEmail());

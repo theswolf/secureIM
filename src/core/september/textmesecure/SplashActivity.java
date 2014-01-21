@@ -1,8 +1,9 @@
 package core.september.textmesecure;
 
+import java.util.concurrent.TimeUnit;
+
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import core.september.textmesecure.configs.Route;
@@ -29,11 +30,26 @@ public class SplashActivity extends O9BaseActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-    	super.onCreate(savedInstanceState);
-    	while(imService == null) {}
-    	Route route = imService.getRoute();
-    	Toast.makeText(this, "Route is "+route, 300).show();
+    protected void onResume() {
+    	super.onResume();
+    	new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while(imService == null) {
+					try {
+						Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						android.util.Log.e(TAG(),e.getMessage(), e);
+					}
+				}
+		    	Route route = imService.getRoute();
+		    	Toast.makeText(SplashActivity.this, "Route is "+route, 300).show();
+				
+			}
+		}).start();
+    	
     	
     	
     }

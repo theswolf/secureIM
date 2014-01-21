@@ -68,10 +68,13 @@ public BroadcastReceiver mReceiver = new BroadcastReceiver() {
 		super.onResume();
 		getApplicationContext().bindService(new Intent(this,O9IMService.class), this.mConnection , Context.BIND_AUTO_CREATE); 
 		IntentFilter intentFilter = new IntentFilter();
-		for(String action: getAction()) {
-			intentFilter.addAction(action);
+		if(getAction() != null) {
+			for(String action: getAction()) {
+				intentFilter.addAction(action);
+			}
+			LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,intentFilter);
 		}
-		LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,intentFilter);
+		
 	}
 	
 	@Override

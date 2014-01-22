@@ -32,20 +32,30 @@ public class SplashActivity extends O9BaseActivity {
     @Override
     protected void onResume() {
     	super.onResume();
+ 
     	new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
 				while(imService == null) {
 					try {
-						Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+						Thread.sleep(TimeUnit.SECONDS.toMillis(1));
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						android.util.Log.e(TAG(),e.getMessage(), e);
 					}
 				}
-		    	Route route = imService.getRoute();
-		    	Toast.makeText(SplashActivity.this, "Route is "+route, 300).show();
+		    	final Route route = imService.getRoute();
+		    	SplashActivity.this.runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						//Toast.makeText(SplashActivity.this, "Route is "+route, 300).show();
+						 Intent intent = new Intent(SplashActivity.this, SignUp.class);
+						 SplashActivity.this.startActivity(intent);
+					}
+				});
+		    	
 				
 			}
 		}).start();

@@ -28,7 +28,8 @@ protected O9IMService imService;
 protected ServiceConnection mConnection= new ServiceConnection() {
 	
 	public void onServiceConnected(ComponentName className, IBinder service) {          
-		imService = ((O9IMService.IMBinder)service).getService();   		
+		imService = ((O9IMService.IMBinder)service).getService();   
+        O9BaseActivity.this.onPostConnect();
 	}
 	public void onServiceDisconnected(ComponentName className) {          
 		imService = null;
@@ -42,7 +43,7 @@ protected String TAG() {
 }
 protected abstract void onReceiveBrodcast(Context context, Intent intent);
 protected abstract String[] getAction();
-
+protected abstract void onPostConnect();
 public BroadcastReceiver mReceiver = new BroadcastReceiver() {
 	
 	@Override

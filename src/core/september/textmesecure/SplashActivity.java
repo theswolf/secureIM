@@ -17,7 +17,7 @@ import core.september.textmesecure.supertypes.O9BaseActivity;
  */
 public class SplashActivity extends O9BaseActivity {
 
-	private final static String TAG = SplashActivity.class.getSimpleName();
+
 	private ProgressBar progressBar;
 //	private enum Route {
 //		NEED_SIGNUP,
@@ -26,45 +26,22 @@ public class SplashActivity extends O9BaseActivity {
 //	}
 //	
 //	private User user = null;
-//	private Route route;
+//	private Route rou
 
+	@Override
+	protected void onPostConnect()
+	{
+		final Route route = imService.getRoute();
+		SplashActivity.this.runOnUiThread(new Runnable() {
 
-    @Override
-    protected void onResume() {
-    	super.onResume();
- 
-    	new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				while(imService == null) {
-					try {
-						Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						android.util.Log.e(TAG(),e.getMessage(), e);
-					}
+				@Override
+				public void run() {
+					//Toast.makeText(SplashActivity.this, "Route is "+route, 300).show();
+					Intent intent = new Intent(SplashActivity.this, SignUp.class);
+					SplashActivity.this.startActivity(intent);
 				}
-		    	final Route route = imService.getRoute();
-		    	SplashActivity.this.runOnUiThread(new Runnable() {
-					
-					@Override
-					public void run() {
-						//Toast.makeText(SplashActivity.this, "Route is "+route, 300).show();
-						 Intent intent = new Intent(SplashActivity.this, SignUp.class);
-						 SplashActivity.this.startActivity(intent);
-					}
-				});
-		    	
-				
-			}
-		}).start();
-    	
-    	
-    	
-    }
-
-
+			});
+	}
 	
 
 

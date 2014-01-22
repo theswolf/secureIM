@@ -51,6 +51,14 @@ public class SignUp  extends O9BaseActivity{
 	}
 
 	@Override
+	protected void onPostConnect()
+	{
+		// TODO: Implement this method
+	}
+
+	
+
+	@Override
 	protected String[] getAction() {
 		// TODO Auto-generated method stub
 		return null;

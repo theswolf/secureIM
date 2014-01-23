@@ -1,11 +1,11 @@
 package core.september.textmesecure;
 
-import java.util.concurrent.TimeUnit;
-
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 import core.september.textmesecure.configs.Route;
 import core.september.textmesecure.supertypes.O9BaseActivity;
 
@@ -27,20 +27,53 @@ public class SplashActivity extends O9BaseActivity {
 //	
 //	private User user = null;
 //	private Route rou
+	
+	@Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash);
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+//        runOnUiThread(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+//				try{
+//					Thread.sleep(5000);
+//				}
+//				catch(Exception e) {
+//					android.util.Log.e(TAG(),e.getMessage(),e);
+//				}
+//				
+//			}
+//		});
+	}
 
 	@Override
 	protected void onPostConnect()
 	{
 		final Route route = imService.getRoute();
-		SplashActivity.this.runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					//Toast.makeText(SplashActivity.this, "Route is "+route, 300).show();
-					Intent intent = new Intent(SplashActivity.this, SignUp.class);
-					SplashActivity.this.startActivity(intent);
-				}
-			});
+		progressBar.setVisibility(View.GONE);
+;
+		
+		new Handler().postDelayed(new Runnable() {
+			 
+            /*
+             * Showing splash screen with a timer. This will be useful when you
+             * want to show case your app logo / company
+             */
+ 
+            @Override
+            public void run() {
+                // This method will be executed once the timer is over
+                // Start your app main activity
+                Intent i = new Intent(SplashActivity.this, SignUp.class);
+                startActivity(i);
+ 
+                // close this activity
+                finish();
+            }
+        }, 5000);
 	}
 	
 
